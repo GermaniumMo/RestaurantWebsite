@@ -1,0 +1,335 @@
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+.top-header {
+  z-index: 10;
+  height: 72px;
+  background: transparent;
+  top: 20px;
+}
+.header-container {
+  padding: 0 10rem;
+}
+.top-header h1 {
+  color: white;
+  font-size: 2.5rem;
+  font-family: "Cormorant Garamond", serif;
+  margin: 0;
+  line-height: 2.063rem;
+}
+.top-header ul {
+  color: white;
+  font-size: 1.5rem;
+  font-family: "Cormorant Garamond", serif;
+}
+.btn-Reserve {
+  background-color: #ea580c;
+  color: white;
+  border-radius: 2rem !important;
+  width: 9.688rem;
+  font-size: 1rem;
+}
+.btn-Reserve:hover {
+  background-color: #c94e0c !important;
+  color: white;
+}
+.btn-order {
+  background-color: #111827;
+  color: white;
+  border-radius: 2rem !important;
+  width: 7.125rem;
+  font-size: 1rem;
+}
+.btn-order:hover {
+  background-color: #020305;
+  color: white;
+}
+.navbar li a.active {
+  color: #ea580c !important;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+
+.features {
+  padding: 10rem 10rem;
+}
+.features-restaurant {
+  background-color: #faf9f7;
+}
+.features h3 {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 2rem;
+  font-weight: 700;
+}
+.features p {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.5rem;
+  font-weight: 400;
+}
+.menu-restaurant {
+  padding: 10rem 10rem;
+}
+.card-title {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.7rem;
+  font-weight: 700;
+  text-shadow: 1px 6px 20px rgba(0, 0, 0, 0.5);
+}
+.card-text {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.5rem;
+  font-weight: 400;
+  text-shadow: 1px 6px 20px rgba(0, 0, 0, 0.5);
+  color: #4b5563;
+}
+.card-body span {
+  color: #ea580c;
+  font-size: 1.5rem;
+  text-shadow: 1px 6px 20px rgba(0, 0, 0, 0.5);
+}
+.contactFooter-container {
+  background-color: #111827;
+}
+.contactFooter-innContainer {
+  padding: 0 10rem;
+  padding-top: 7rem;
+}
+.reservation-title {
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 700;
+  font-size: 2.25rem;
+  color: white;
+}
+.reservation-description {
+  font-family: "Cormorant Garamond", serif;
+  font-weight: 300;
+  color: white;
+  font-size: 1.5rem;
+}
+.input-form {
+  color: #adaebc !important;
+  background-color: #1f2937 !important;
+  border-color: #374151 !important;
+}
+.input-form::placeholder {
+  color: #adaebc;
+}
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(70%);
+}
+input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(70%);
+}
+.reservation-btn {
+  background-color: #ea580c;
+  color: white;
+}
+.reservation-btn:hover{
+  background-color: #d3520c;
+  color: white
+}
+.reservation-btn:active{
+  background-color: #d3520ca1 !important;
+}
+.reservation-btn:disabled {
+   background-color: #d3520c !important;
+   color: white;
+   border: none;
+}
+
+.restaurant-info {
+  margin-top: 9rem;
+  margin-bottom: 2rem;
+  gap: 2rem;
+}
+.title-info {
+  color: #ea580c;
+  font-size: 2rem;
+  font-weight: 700;
+  font-family: "Cormorant Garamond", serif;
+}
+.description-info {
+  color: #9ca3af;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.4rem;
+  font-weight: 400;
+}
+.contact-title {
+  color: white;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+.nav-item {
+  color: #9ca3af !important;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.4rem;
+  font-weight: 400;
+}
+
+.nav-item a {
+  color: #9ca3af !important;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.4rem;
+  font-weight: 400;
+}
+.nav-item svg {
+  margin-right: 1rem;
+}
+.footer-copyright {
+  color: #9ca3af !important;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.4rem;
+  font-weight: 400;
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  opacity: 0;
+}
+.introduction-section {
+  background-color: #faf9f7;
+}
+.introduction-container {
+  padding: 5rem 10rem;
+}
+.introduction-container h1 {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 3rem;
+  font-weight: 700;
+}
+
+.introduction-container p {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: #4b5563;
+}
+.about-container {
+  padding: 10rem 10rem;
+}
+.legacy-title {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 2.4rem;
+  font-weight: 700;
+}
+.legacy-description {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: #4b5563;
+}
+.coreValues-section {
+  background-color: #faf9f7;
+}
+.coreValues-container {
+  padding: 10rem 10rem;
+}
+.coreValues-cardTitle {
+  text-shadow: none;
+}
+.coreValues-cardText {
+  text-shadow: none;
+}
+.coreValues-container h2 {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+.team-container {
+  padding: 10rem 10rem;
+}
+.team-container h2 {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+.container-menu {
+  padding: 3rem 10rem;
+}
+.btn-container {
+  margin: 1.5rem 10rem 2.5rem 10rem;
+
+}
+.btn-menu-active {
+  color: white !important;
+}
+.btn-menu {
+    position: relative;
+  border: none;
+  border-radius: 2rem;
+background-color: transparent;
+  color: #374151;
+  font-size: 1rem;
+  font-weight: 400;
+   z-index: 1;
+  cursor: pointer;
+  transition: color 0.3s ease;
+
+}
+.btn-menu:hover{
+  background-color: #ea5a0cb6;
+  color: white;
+}
+.menu-card-img-top{
+  height: 15.625rem;
+}
+.btn-primary {
+  background-color: #ea580c;
+  border: 1px  #ea580c;
+}
+.btn-primary:hover{
+  background-color: #c24f10 !important;
+}
+.btn-primary:active {
+  background-color: #e96720 !important;
+}
+.contact-section{
+  background-color: #FFF7ED;
+}
+.contact-container {
+  padding: 4rem 10rem;
+}
+.contact-container p {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: #4b5563;
+  text-align: center;
+}
+.contact-container h1 {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 3rem;
+  font-weight: 700;
+}
+.contact-card h6 {
+  font-size: 20px !important;
+  color: black !important;
+  font-weight: 500 !important;
+}
+.no-shadow {
+  text-shadow: none;
+}
+.message-section {
+  background-color: #F9FAFB;
+}
+.form-box {
+  background-color: white;
+}
+.active-bg {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background-color: #ea580c;
+  transition: all 0.3s ease;
+  z-index: 0;
+  border: none;
+  border-radius: 2rem;
+  
+}
