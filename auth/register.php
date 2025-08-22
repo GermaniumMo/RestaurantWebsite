@@ -1,201 +1,198 @@
 <?php
-require_once '../includes/functions.php';
-require_once '../includes/auth.php';
-require_once '../config/database.php';
-require_once '../classes/User.php';
+require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/csrf.php';
+require_once __DIR__ . '/../includes/flash.php';
+require_once __DIR__ . '/../includes/validation.php';
+require_once __DIR__ . '/../includes/security.php';
 
-if (is_user_logged_in()) {
-    redirect('../index.php');
+// Redirect if already logged in
+if (is_logged_in()) {
+    header('Location: ' . BASE_URL . '/index.php');
+    exit;
 }
 
-$error = '';
-$success = '';
+$errors = [];
+$name = '';
+$email = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $database = new Database();
-    $db = $database->getConnection();
-    $user = new User($db);
+    verify_csrf();
     
-    $user->first_name = sanitize_input($_POST['first_name']);
-    $user->last_name = sanitize_input($_POST['last_name']);
-    $user->email = sanitize_input($_POST['email']);
-    $user->phone = sanitize_input($_POST['phone']);
-    $user->address = sanitize_input($_POST['address']);
-    $user->city = sanitize_input($_POST['city']);
-    $user->postal_code = sanitize_input($_POST['postal_code']);
-    $user->date_of_birth = sanitize_input($_POST['date_of_birth']);
-    $password = $_POST['password'];
-    $confirm_password = $_POST['confirm_password'];
+    $name = sanitize_input($_POST['name'] ?? '');
+    $email = sanitize_input($_POST['email'] ?? '');
+    $password = $_POST['password'] ?? '';
+    $confirm_password = $_POST['confirm_password'] ?? '';
     
-    // Validation
-    if (empty($user->first_name) || empty($user->last_name) || empty($user->email) || empty($password)) {
-        $error = 'Please fill in all required fields.';
-    } elseif (!filter_var($user->email, FILTER_VALIDATE_EMAIL)) {
-        $error = 'Please enter a valid email address.';
+    // Validation rules
+    $validation_rules = [
+        'name' => [
+            ['type' => 'required', 'field_name' => 'Name'],
+            ['type' => 'min_length', 'length' => 2, 'field_name' => 'Name'],
+            ['type' => 'max_length', 'length' => 100, 'field_name' => 'Name']
+        ],
+        'email' => [
+            ['type' => 'required', 'field_name' => 'Email'],
+            ['type' => 'email'],
+            ['type' => 'unique_email']
+        ]
+    ];
+    
+    $errors = validate_fields($_POST, $validation_rules);
+    
+    // Password validation
+    if (empty($password)) {
+        $errors['password'] = 'Password is required.';
     } elseif (strlen($password) < 6) {
-        $error = 'Password must be at least 6 characters long.';
+        $errors['password'] = 'Password must be at least 6 characters long.';
+    }
+    
+    if (empty($confirm_password)) {
+        $errors['confirm_password'] = 'Please confirm your password.';
     } elseif ($password !== $confirm_password) {
-        $error = 'Passwords do not match.';
-    } elseif ($user->emailExists()) {
-        $error = 'An account with this email already exists.';
-    } else {
-        $user->password = $password;
-        
-        if ($user->register()) {
-            $success = 'Account created successfully! You can now log in.';
-        } else {
-            $error = 'Failed to create account. Please try again.';
+        $errors['confirm_password'] = 'Passwords do not match.';
+    }
+    
+    if (empty($errors)) {
+        try {
+            $user_id = create_user($name, $email, $password);
+            
+            if ($user_id) {
+                login_user($user_id);
+                flash('success', 'Account created successfully! Welcome to Savoria.');
+                header('Location: ' . BASE_URL . '/index.php');
+                exit;
+            } else {
+                $errors['general'] = 'Failed to create account. Please try again.';
+            }
+        } catch (Exception $e) {
+            $errors['general'] = 'An error occurred. Please try again.';
         }
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - Savoria</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Sign Up - Savoria</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="../css/main.css">
-    <style>
-        .auth-container {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem 0;
-        }
-        .auth-card {
-            background: white;
-            border-radius: 1rem;
-            padding: 3rem;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 600px;
-        }
-        .auth-title {
-            font-family: "Cormorant Garamond", serif;
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #ea580c;
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        .btn-primary {
-            background-color: #ea580c;
-            border-color: #ea580c;
-        }
-        .btn-primary:hover {
-            background-color: #dc2626;
-            border-color: #dc2626;
-        }
-    </style>
 </head>
 <body>
-    <div class="auth-container">
-        <div class="auth-card">
-            <h1 class="auth-title">Create Account</h1>
-            
-            <?php if ($error): ?>
-                <div class="alert alert-danger" role="alert">
-                    <?php echo $error; ?>
-                </div>
-            <?php endif; ?>
-            
-            <?php if ($success): ?>
-                <div class="alert alert-success" role="alert">
-                    <?php echo $success; ?>
-                    <br><a href="login.php" class="alert-link">Click here to login</a>
-                </div>
-            <?php endif; ?>
-            
-            <form method="POST">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="first_name" class="form-label">First Name *</label>
-                            <input type="text" class="form-control" id="first_name" name="first_name" 
-                                   value="<?php echo isset($_POST['first_name']) ? htmlspecialchars($_POST['first_name']) : ''; ?>" required>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="last_name" class="form-label">Last Name *</label>
-                            <input type="text" class="form-control" id="last_name" name="last_name" 
-                                   value="<?php echo isset($_POST['last_name']) ? htmlspecialchars($_POST['last_name']) : ''; ?>" required>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="mb-3">
-                    <label for="email" class="form-label">Email Address *</label>
-                    <input type="email" class="form-control" id="email" name="email" 
-                           value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>" required>
-                </div>
-                
-                <div class="mb-3">
-                    <label for="phone" class="form-label">Phone Number</label>
-                    <input type="tel" class="form-control" id="phone" name="phone" 
-                           value="<?php echo isset($_POST['phone']) ? htmlspecialchars($_POST['phone']) : ''; ?>">
-                </div>
-                
-                <div class="mb-3">
-                    <label for="address" class="form-label">Address</label>
-                    <input type="text" class="form-control" id="address" name="address" 
-                           value="<?php echo isset($_POST['address']) ? htmlspecialchars($_POST['address']) : ''; ?>">
-                </div>
-                
-                <div class="row">
-                    <div class="col-md-8">
-                        <div class="mb-3">
-                            <label for="city" class="form-label">City</label>
-                            <input type="text" class="form-control" id="city" name="city" 
-                                   value="<?php echo isset($_POST['city']) ? htmlspecialchars($_POST['city']) : ''; ?>">
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="mb-3">
-                            <label for="postal_code" class="form-label">Postal Code</label>
-                            <input type="text" class="form-control" id="postal_code" name="postal_code" 
-                                   value="<?php echo isset($_POST['postal_code']) ? htmlspecialchars($_POST['postal_code']) : ''; ?>">
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="mb-3">
-                    <label for="date_of_birth" class="form-label">Date of Birth</label>
-                    <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" 
-                           value="<?php echo isset($_POST['date_of_birth']) ? htmlspecialchars($_POST['date_of_birth']) : ''; ?>">
-                </div>
-                
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Password *</label>
-                            <input type="password" class="form-control" id="password" name="password" required>
-                            <div class="form-text">Minimum 6 characters</div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="confirm_password" class="form-label">Confirm Password *</label>
-                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
-                        </div>
-                    </div>
-                </div>
-                
-                <button type="submit" class="btn btn-primary w-100 p-3 mb-3">Create Account</button>
-                
-                <div class="text-center">
-                    <p>Already have an account? <a href="login.php" class="text-decoration-none" style="color: #ea580c;">Login here</a></p>
-                    <p><a href="../index.php" class="text-decoration-none text-muted">← Back to Home</a></p>
-                </div>
-            </form>
+    <header class="d-flex top-header w-100 position-absolute left-0">
+        <div class="d-flex justify-content-between py-3 w-100 header-container">
+            <h1><a href="../index.php" style="color: white; text-decoration: none;">Savoria</a></h1>
+            <ul class="d-flex list-unstyled gap-4 m-0 justify-content-center align-items-center navbar">
+                <li><a href="../index.php" style="color: white; text-decoration: none">Home</a></li>
+                <li><a href="../menu.php" style="color: white; text-decoration: none">Menu</a></li>
+                <li><a href="../about.php" style="color: white; text-decoration: none">About</a></li>
+                <li><a href="../contact.php" style="color: white; text-decoration: none">Contact</a></li>
+            </ul>
+            <div class="d-flex gap-3">
+                <a class="btn btn-Reserve" href="register.php">Sign Up</a>
+                <a class="btn btn-order" href="login.php">Login</a>
+            </div>
         </div>
-    </div>
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    </header>
+
+    <section class="d-flex w-100 contactFooter-container justify-content-center align-items-center" style="min-height: 100vh;">
+        <div class="w-100 d-flex flex-column contactFooter-innContainer justify-content-center align-items-center">
+            <div class="d-flex flex-column w-75" style="max-width: 500px;">
+                <div class="d-flex flex-column justify-content-center align-items-center mb-4">
+                    <h1 class="reservation-title text-center">Join Savoria</h1>
+                    <p class="reservation-description text-center">Create your account for exclusive dining experiences</p>
+                </div>
+
+                <?php if (!empty($errors['general'])): ?>
+                    <div class="alert alert-danger" role="alert">
+                        <?= htmlspecialchars($errors['general']) ?>
+                    </div>
+                <?php endif; ?>
+
+                <form method="POST" class="d-flex flex-column gap-4">
+                    <?= csrf_field() ?>
+                    
+                    <div class="d-flex flex-column">
+                        <input 
+                            type="text" 
+                            name="name" 
+                            placeholder="Full Name"
+                            value="<?= htmlspecialchars($name) ?>"
+                            class="w-100 bg-transparent p-3 border border-1 rounded-3 input-form <?= !empty($errors['name']) ? 'is-invalid' : '' ?>"
+                            required
+                        >
+                        <?php if (!empty($errors['name'])): ?>
+                            <div class="invalid-feedback d-block">
+                                <?= htmlspecialchars($errors['name']) ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="d-flex flex-column">
+                        <input 
+                            type="email" 
+                            name="email" 
+                            placeholder="Email Address"
+                            value="<?= htmlspecialchars($email) ?>"
+                            class="w-100 bg-transparent p-3 border border-1 rounded-3 input-form <?= !empty($errors['email']) ? 'is-invalid' : '' ?>"
+                            required
+                        >
+                        <?php if (!empty($errors['email'])): ?>
+                            <div class="invalid-feedback d-block">
+                                <?= htmlspecialchars($errors['email']) ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="d-flex flex-column">
+                        <input 
+                            type="password" 
+                            name="password" 
+                            placeholder="Password (min. 6 characters)"
+                            class="w-100 bg-transparent p-3 border border-1 rounded-3 input-form <?= !empty($errors['password']) ? 'is-invalid' : '' ?>"
+                            required
+                        >
+                        <?php if (!empty($errors['password'])): ?>
+                            <div class="invalid-feedback d-block">
+                                <?= htmlspecialchars($errors['password']) ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="d-flex flex-column">
+                        <input 
+                            type="password" 
+                            name="confirm_password" 
+                            placeholder="Confirm Password"
+                            class="w-100 bg-transparent p-3 border border-1 rounded-3 input-form <?= !empty($errors['confirm_password']) ? 'is-invalid' : '' ?>"
+                            required
+                        >
+                        <?php if (!empty($errors['confirm_password'])): ?>
+                            <div class="invalid-feedback d-block">
+                                <?= htmlspecialchars($errors['confirm_password']) ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+
+                    <button type="submit" class="btn w-100 p-3 reservation-btn">
+                        Create Account
+                    </button>
+
+                    <div class="text-center">
+                        <p class="reservation-description">
+                            Already have an account? 
+                            <a href="login.php" style="color: #ea580c; text-decoration: none;">Sign in here</a>
+                        </p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
 </html>

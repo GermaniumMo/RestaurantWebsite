@@ -130,17 +130,17 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   background-color: #ea580c;
   color: white;
 }
-.reservation-btn:hover{
+.reservation-btn:hover {
   background-color: #d3520c;
-  color: white
+  color: white;
 }
-.reservation-btn:active{
+.reservation-btn:active {
   background-color: #d3520ca1 !important;
 }
 .reservation-btn:disabled {
-   background-color: #d3520c !important;
-   color: white;
-   border: none;
+  background-color: #d3520c !important;
+  color: white;
+  border: none;
 }
 
 .restaurant-info {
@@ -255,43 +255,41 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 .btn-container {
   margin: 1.5rem 10rem 2.5rem 10rem;
-
 }
 .btn-menu-active {
   color: white !important;
 }
 .btn-menu {
-    position: relative;
+  position: relative;
   border: none;
   border-radius: 2rem;
-background-color: transparent;
+  background-color: transparent;
   color: #374151;
   font-size: 1rem;
   font-weight: 400;
-   z-index: 1;
+  z-index: 1;
   cursor: pointer;
   transition: color 0.3s ease;
-
 }
-.btn-menu:hover{
+.btn-menu:hover {
   background-color: #ea5a0cb6;
   color: white;
 }
-.menu-card-img-top{
+.menu-card-img-top {
   height: 15.625rem;
 }
 .btn-primary {
   background-color: #ea580c;
-  border: 1px  #ea580c;
+  border: 1px #ea580c;
 }
-.btn-primary:hover{
+.btn-primary:hover {
   background-color: #c24f10 !important;
 }
 .btn-primary:active {
   background-color: #e96720 !important;
 }
-.contact-section{
-  background-color: #FFF7ED;
+.contact-section {
+  background-color: #fff7ed;
 }
 .contact-container {
   padding: 4rem 10rem;
@@ -317,7 +315,7 @@ background-color: transparent;
   text-shadow: none;
 }
 .message-section {
-  background-color: #F9FAFB;
+  background-color: #f9fafb;
 }
 .form-box {
   background-color: white;
@@ -331,5 +329,4 @@ background-color: transparent;
   z-index: 0;
   border: none;
   border-radius: 2rem;
-  
 }

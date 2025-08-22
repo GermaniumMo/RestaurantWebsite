@@ -1,120 +1,171 @@
 <?php
-require_once '../includes/functions.php';
-require_once '../includes/auth.php';
-require_once '../config/database.php';
-require_once '../classes/User.php';
+require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/csrf.php';
+require_once __DIR__ . '/../includes/flash.php';
+require_once __DIR__ . '/../includes/validation.php';
+require_once __DIR__ . '/../includes/security.php';
+require_once __DIR__ . '/../includes/db.php';
 
-if (is_user_logged_in()) {
-    redirect('../index.php');
+// Set security headers
+set_security_headers();
+
+// Redirect if already logged in
+if (is_logged_in()) {
+    header('Location: ' . BASE_URL . '/index.php');
+    exit;
 }
 
-$error = '';
+$errors = [];
+$email = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = sanitize_input($_POST['email']);
-    $password = $_POST['password'];
+    if (!verify_csrf()) {
+        flash('error', 'Invalid security token.');
+        header('Location: login.php');
+        exit;
+    }
     
-    if (empty($email) || empty($password)) {
-        $error = 'Please enter both email and password.';
-    } else {
-        $database = new Database();
-        $db = $database->getConnection();
-        $user = new User($db);
+    $email = sanitize_input($_POST['email'] ?? '');
+    $password = $_POST['password'] ?? '';
+    
+    $db = db();
+    $rate_limiter = new RateLimiter($db);
+    $client_ip = get_client_ip();
+    
+    // Check rate limiting
+    if ($rate_limiter->isLimited($client_ip, 'login', 5, 15)) {
+        $remaining_attempts = $rate_limiter->getRemainingAttempts($client_ip, 'login', 5, 15);
+        log_security_event('login_rate_limited', ['ip' => $client_ip, 'email' => $email]);
+        $errors['general'] = 'Too many failed login attempts. Please try again in 15 minutes.';
+    }
+    
+    // Validation
+    if (empty($email)) {
+        $errors['email'] = 'Email is required.';
+    } elseif (!is_valid_email($email)) {
+        $errors['email'] = 'Please enter a valid email address.';
+    }
+    
+    if (empty($password)) {
+        $errors['password'] = 'Password is required.';
+    }
+    
+    if (empty($errors)) {
+        $user = get_user_by_email($email);
         
-        if ($user->login($email, $password)) {
-            login_user($user);
+        if ($user && $user['is_active'] && verify_user_password($user, $password)) {
+            // Successful login
+            log_security_event('login_success', ['user_id' => $user['id'], 'email' => $email], $user['id']);
+            login_user($user['id']);
             
             // Redirect to intended page or dashboard
-            $redirect_url = isset($_GET['redirect']) ? $_GET['redirect'] : '../profile/dashboard.php';
-            redirect($redirect_url);
+            $redirect = $_SESSION['redirect_after_login'] ?? (has_role('admin') ? '/admin/index.php' : '/index.php');
+            unset($_SESSION['redirect_after_login']);
+            
+            header('Location: ' . BASE_URL . $redirect);
+            exit;
         } else {
-            $error = 'Invalid email or password.';
+            // Failed login
+            $rate_limiter->recordAttempt($client_ip, 'login');
+            log_security_event('login_failed', ['ip' => $client_ip, 'email' => $email]);
+            $errors['general'] = 'Invalid email or password.';
         }
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Savoria</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="../css/main.css">
-    <style>
-        .auth-container {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .auth-card {
-            background: white;
-            border-radius: 1rem;
-            padding: 3rem;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 400px;
-        }
-        .auth-title {
-            font-family: "Cormorant Garamond", serif;
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #ea580c;
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        .btn-primary {
-            background-color: #ea580c;
-            border-color: #ea580c;
-        }
-        .btn-primary:hover {
-            background-color: #dc2626;
-            border-color: #dc2626;
-        }
-    </style>
 </head>
 <body>
-    <div class="auth-container">
-        <div class="auth-card">
-            <h1 class="auth-title">Welcome Back</h1>
-            
-            <?php if ($error): ?>
-                <div class="alert alert-danger" role="alert">
-                    <?php echo $error; ?>
-                </div>
-            <?php endif; ?>
-            
-            <form method="POST">
-                <div class="mb-3">
-                    <label for="email" class="form-label">Email Address</label>
-                    <input type="email" class="form-control" id="email" name="email" 
-                           value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>" required>
-                </div>
-                
-                <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="password" name="password" required>
-                </div>
-                
-                <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" id="remember_me" name="remember_me">
-                    <label class="form-check-label" for="remember_me">Remember me</label>
-                </div>
-                
-                <button type="submit" class="btn btn-primary w-100 p-3 mb-3">Login</button>
-                
-                <div class="text-center">
-                    <p><a href="forgot-password.php" class="text-decoration-none" style="color: #ea580c;">Forgot your password?</a></p>
-                    <p>Don't have an account? <a href="register.php" class="text-decoration-none" style="color: #ea580c;">Register here</a></p>
-                    <p><a href="../index.php" class="text-decoration-none text-muted">← Back to Home</a></p>
-                </div>
-            </form>
+    <header class="d-flex top-header w-100 position-absolute left-0">
+        <div class="d-flex justify-content-between py-3 w-100 header-container">
+            <h1><a href="../index.php" style="color: white; text-decoration: none;">Savoria</a></h1>
+            <ul class="d-flex list-unstyled gap-4 m-0 justify-content-center align-items-center navbar">
+                <li><a href="../index.php" style="color: white; text-decoration: none">Home</a></li>
+                <li><a href="../menu.php" style="color: white; text-decoration: none">Menu</a></li>
+                <li><a href="../about.php" style="color: white; text-decoration: none">About</a></li>
+                <li><a href="../contact.php" style="color: white; text-decoration: none">Contact</a></li>
+            </ul>
+            <div class="d-flex gap-3">
+                <a class="btn btn-Reserve" href="register.php">Sign Up</a>
+                <a class="btn btn-order" href="login.php">Login</a>
+            </div>
         </div>
-    </div>
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    </header>
+
+    <section class="d-flex w-100 contactFooter-container justify-content-center align-items-center" style="min-height: 100vh;">
+        <div class="w-100 d-flex flex-column contactFooter-innContainer justify-content-center align-items-center">
+            <div class="d-flex flex-column w-75" style="max-width: 500px;">
+                <div class="d-flex flex-column justify-content-center align-items-center mb-4">
+                    <h1 class="reservation-title text-center">Welcome Back</h1>
+                    <p class="reservation-description text-center">Sign in to your account</p>
+                </div>
+
+                <?php if (!empty($errors['general'])): ?>
+                    <div class="alert alert-danger" role="alert">
+                        <?= htmlspecialchars($errors['general']) ?>
+                    </div>
+                <?php endif; ?>
+
+                <form method="POST" class="d-flex flex-column gap-4">
+                    <?php // Fixed function name from csrf_token_field() to csrf_field() ?>
+                    <?= csrf_field() ?>
+                    
+                    <div class="d-flex flex-column">
+                        <input 
+                            type="email" 
+                            name="email" 
+                            placeholder="Email Address"
+                            value="<?= htmlspecialchars($email) ?>"
+                            class="w-100 bg-transparent p-3 border border-1 rounded-3 input-form <?= !empty($errors['email']) ? 'is-invalid' : '' ?>"
+                            required
+                        >
+                        <?php if (!empty($errors['email'])): ?>
+                            <div class="invalid-feedback d-block">
+                                <?= htmlspecialchars($errors['email']) ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="d-flex flex-column">
+                        <input 
+                            type="password" 
+                            name="password" 
+                            placeholder="Password"
+                            class="w-100 bg-transparent p-3 border border-1 rounded-3 input-form <?= !empty($errors['password']) ? 'is-invalid' : '' ?>"
+                            required
+                        >
+                        <?php if (!empty($errors['password'])): ?>
+                            <div class="invalid-feedback d-block">
+                                <?= htmlspecialchars($errors['password']) ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+
+                    <button type="submit" class="btn w-100 p-3 reservation-btn">
+                        Sign In
+                    </button>
+
+                    <div class="text-center">
+                        <p class="reservation-description">
+                            Don't have an account? 
+                            <a href="register.php" style="color: #ea580c; text-decoration: none;">Sign up here</a>
+                        </p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
 </html>
