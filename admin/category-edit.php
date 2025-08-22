@@ -4,6 +4,7 @@ require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/csrf.php';
 require_once __DIR__ . '/../includes/flash.php';
 require_once __DIR__ . '/../includes/validation.php';
+require_once __DIR__ . '/../includes/security.php'; // Added missing security.php include for sanitize_input function
 
 // Require admin role
 require_role('admin');
@@ -62,12 +63,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'ssiii'
             );
             
-            if ($affected_rows >= 0) {
+            if ($affected_rows > 0) {
                 flash('success', 'Category updated successfully!');
                 header('Location: category-list.php');
                 exit;
             } else {
-                $errors['general'] = 'Failed to update category. Please try again.';
+                $errors['general'] = 'No changes were made or category not found.';
             }
         } catch (Exception $e) {
             $errors['general'] = 'An error occurred while updating the category.';

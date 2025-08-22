@@ -9,7 +9,7 @@ if (!is_logged_in() || !has_role('admin')) {
     exit;
 }
 
-$db = db();
+$db = get_db_connection();
 
 // Handle search and filtering
 $search = $_GET['search'] ?? '';
@@ -35,15 +35,20 @@ if (!empty($role_filter)) {
 
 $where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
 
-$count_sql = "SELECT COUNT(*) as count FROM users $where_clause";
-$count_result = db_fetch_one($count_sql, $params);
-$total_users = $count_result['count'];
+// Get total count
+$count_sql = "SELECT COUNT(*) FROM users $where_clause";
+$count_stmt = $db->prepare($count_sql);
+$count_stmt->execute($params);
+$total_users = $count_stmt->fetchColumn();
 $total_pages = ceil($total_users / $per_page);
 
+// Get users
 $sql = "SELECT * FROM users $where_clause ORDER BY created_at DESC LIMIT ? OFFSET ?";
 $params[] = $per_page;
 $params[] = $offset;
-$users = db_fetch_all($sql, $params);
+$stmt = $db->prepare($sql);
+$stmt->execute($params);
+$users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 include 'shared/header.php';
 ?>

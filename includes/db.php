@@ -145,8 +145,4 @@ function db_insert($sql, $params = [], $types = '') {
 function db_execute($sql, $params = [], $types = '') {
     return db()->execute($sql, $params, $types);
 }
-
-function get_db_connection() {
-    return Database::getInstance()->getConnection();
-}
 ?>

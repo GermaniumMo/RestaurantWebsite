@@ -15,18 +15,8 @@ $user = current_user();
 
 $user = db_fetch_one("SELECT * FROM users WHERE id = ?", [$user['id']], 'i');
 
-$is_ajax = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
-
-if ($is_ajax) {
-    header('Content-Type: application/json');
-}
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!verify_csrf()) {
-        if ($is_ajax) {
-            echo json_encode(['success' => false, 'message' => 'Invalid security token.']);
-            exit;
-        }
         flash('error', 'Invalid security token.');
         header('Location: profile.php');
         exit;
@@ -57,10 +47,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 db_execute("UPDATE users SET name = ?, email = ?, updated_at = NOW() WHERE id = ?", [$name, $email, $user['id']], 'ssi');
 
-                if ($is_ajax) {
-                    echo json_encode(['success' => true, 'message' => 'Profile updated successfully.']);
-                    exit;
-                }
                 flash('success', 'Profile updated successfully.');
                 header('Location: profile.php');
                 exit;
@@ -70,10 +56,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if (!empty($errors)) {
-            if ($is_ajax) {
-                echo json_encode(['success' => false, 'message' => implode('<br>', $errors)]);
-                exit;
-            }
             flash('error', implode('<br>', $errors));
         }
     } elseif ($action === 'change_password') {
@@ -104,10 +86,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
                 db_execute("UPDATE users SET password_hash = ?, updated_at = NOW() WHERE id = ?", [$hashed_password, $user['id']], 'si');
 
-                if ($is_ajax) {
-                    echo json_encode(['success' => true, 'message' => 'Password changed successfully.']);
-                    exit;
-                }
                 flash('success', 'Password changed successfully.');
                 header('Location: profile.php');
                 exit;
@@ -117,10 +95,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if (!empty($errors)) {
-            if ($is_ajax) {
-                echo json_encode(['success' => false, 'message' => implode('<br>', $errors)]);
-                exit;
-            }
             flash('error', implode('<br>', $errors));
         }
     }
@@ -186,8 +160,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <h5 class="mb-0">Profile Information</h5>
                             </div>
                             <div class="card-body">
-                                <!-- Added AJAX form handling with IDs and message div -->
-                                <form id="profileForm" method="POST">
+                                <form method="POST">
                                     <?= csrf_field() ?>
                                     <input type="hidden" name="action" value="update_profile">
                                     
@@ -211,9 +184,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <input type="text" class="form-control" value="<?= date('F j, Y', strtotime($user['created_at'])) ?>" readonly>
                                     </div>
 
-                                    <button type="submit" class="btn btn-primary" id="profileSubmitBtn">Update Profile</button>
+                                    <button type="submit" class="btn btn-primary">Update Profile</button>
                                 </form>
-                                <div id="profileMessage" class="mt-3" style="display: none;"></div>
                             </div>
                         </div>
                     </div>
@@ -224,8 +196,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <h5 class="mb-0">Change Password</h5>
                             </div>
                             <div class="card-body">
-                                <!-- Added AJAX form handling with IDs and message div -->
-                                <form id="passwordForm" method="POST">
+                                <form method="POST">
                                     <?= csrf_field() ?>
                                     <input type="hidden" name="action" value="change_password">
                                     
@@ -245,9 +216,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
                                     </div>
 
-                                    <button type="submit" class="btn btn-warning" id="passwordSubmitBtn">Change Password</button>
+                                    <button type="submit" class="btn btn-warning">Change Password</button>
                                 </form>
-                                <div id="passwordMessage" class="mt-3" style="display: none;"></div>
                             </div>
                         </div>
                     </div>
@@ -257,105 +227,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Added AJAX handling for both profile and password forms -->
-    <script>
-        // Profile form AJAX handling
-        document.getElementById('profileForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const submitBtn = document.getElementById('profileSubmitBtn');
-            const messageDiv = document.getElementById('profileMessage');
-            const originalText = submitBtn.textContent;
-            
-            // Show loading state
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Updating...';
-            messageDiv.style.display = 'none';
-            
-            const formData = new FormData(this);
-            
-            fetch('profile.php', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                messageDiv.style.display = 'block';
-                if (data.success) {
-                    messageDiv.className = 'alert alert-success mt-3';
-                    messageDiv.innerHTML = data.message;
-                } else {
-                    messageDiv.className = 'alert alert-danger mt-3';
-                    messageDiv.innerHTML = data.message;
-                }
-            })
-            .catch(error => {
-                messageDiv.style.display = 'block';
-                messageDiv.className = 'alert alert-danger mt-3';
-                messageDiv.textContent = 'An error occurred. Please try again.';
-            })
-            .finally(() => {
-                submitBtn.disabled = false;
-                submitBtn.textContent = originalText;
-            });
-        });
-
-        // Password form AJAX handling
-        document.getElementById('passwordForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const submitBtn = document.getElementById('passwordSubmitBtn');
-            const messageDiv = document.getElementById('passwordMessage');
-            const originalText = submitBtn.textContent;
-            
-            // Show loading state
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Changing...';
-            messageDiv.style.display = 'none';
-            
-            const formData = new FormData(this);
-            
-            fetch('profile.php', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                messageDiv.style.display = 'block';
-                if (data.success) {
-                    messageDiv.className = 'alert alert-success mt-3';
-                    messageDiv.innerHTML = data.message;
-                    // Clear password fields on success
-                    this.reset();
-                    // Re-add the hidden fields
-                    const csrfField = document.querySelector('input[name="csrf_token"]').cloneNode(true);
-                    const actionField = document.createElement('input');
-                    actionField.type = 'hidden';
-                    actionField.name = 'action';
-                    actionField.value = 'change_password';
-                    this.appendChild(csrfField);
-                    this.appendChild(actionField);
-                } else {
-                    messageDiv.className = 'alert alert-danger mt-3';
-                    messageDiv.innerHTML = data.message;
-                }
-            })
-            .catch(error => {
-                messageDiv.style.display = 'block';
-                messageDiv.className = 'alert alert-danger mt-3';
-                messageDiv.textContent = 'An error occurred. Please try again.';
-            })
-            .finally(() => {
-                submitBtn.disabled = false;
-                submitBtn.textContent = originalText;
-            });
-        });
-    </script>
 </body>
 </html>

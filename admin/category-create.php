@@ -4,6 +4,7 @@ require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/csrf.php';
 require_once __DIR__ . '/../includes/flash.php';
 require_once __DIR__ . '/../includes/validation.php';
+require_once __DIR__ . '/../includes/security.php'; // Added missing security.php include for sanitize_input function
 
 // Require admin role
 require_role('admin');

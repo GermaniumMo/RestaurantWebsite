@@ -1,8 +1,9 @@
 <?php
 define('ADMIN_PAGE', true);
+require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../includes/auth.php';
-require_once __DIR__ . '/../includes/csrf.php';
 require_once __DIR__ . '/../includes/flash.php';
+require_once __DIR__ . '/../includes/csrf.php';
 require_once __DIR__ . '/../includes/validation.php';
 
 // Require admin role
@@ -33,9 +34,26 @@ if (!$reservation) {
 }
 
 $page_subtitle = 'Edit reservation for ' . $reservation['name'];
-
 $errors = [];
 $form_data = $reservation;
+
+// Convert reservation date for <input type="date">
+if (!empty($form_data['reservation_date'])) {
+    $form_data['reservation_date'] = date('Y-m-d', strtotime($form_data['reservation_date']));
+}
+
+// Convert reservation time to 24-hour for <input type="time">
+if (!empty($form_data['reservation_time'])) {
+    $time = DateTime::createFromFormat('H:i:s', $form_data['reservation_time']); // DB might store as H:i:s
+    if (!$time) {
+        $time = DateTime::createFromFormat('h:i A', $form_data['reservation_time']); // fallback
+    }
+    if ($time) {
+        $form_data['reservation_time'] = $time->format('H:i');
+    } else {
+        $form_data['reservation_time'] = '';
+    }
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verify_csrf();
@@ -50,32 +68,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'special_requests' => sanitize_input($_POST['special_requests'] ?? ''),
         'status' => sanitize_input($_POST['status'] ?? '')
     ];
-    
+
+    // Convert 12-hour time to 24-hour
+    if (!empty($_POST['reservation_time'])) {
+        $time = DateTime::createFromFormat('h:i A', $_POST['reservation_time']);
+        if (!$time) {
+            $time = DateTime::createFromFormat('H:i', $_POST['reservation_time']);
+        }
+        $form_data['reservation_time'] = $time ? $time->format('H:i') : '';
+    }
+
     // Validation
     if (empty($form_data['name'])) {
         $errors['name'] = 'Name is required.';
     }
-    
-    if (empty($form_data['email']) || !validate_email($form_data['email'])) {
+    if (empty($form_data['email']) || !filter_var($form_data['email'], FILTER_VALIDATE_EMAIL)) {
         $errors['email'] = 'Valid email is required.';
     }
-    
-    if (empty($form_data['reservation_date']) || !validate_date($form_data['reservation_date'])) {
+    if (empty($form_data['reservation_date']) || !DateTime::createFromFormat('Y-m-d', $form_data['reservation_date'])) {
         $errors['reservation_date'] = 'Valid date is required.';
     }
-    
-    if (empty($form_data['reservation_time']) || !validate_time($form_data['reservation_time'])) {
+    if (empty($form_data['reservation_time']) || !preg_match('/^(?:2[0-3]|[01][0-9]):[0-5][0-9]$/', $form_data['reservation_time'])) {
         $errors['reservation_time'] = 'Valid time is required.';
     }
-    
     if ($form_data['number_of_guests'] < 1 || $form_data['number_of_guests'] > 20) {
         $errors['number_of_guests'] = 'Number of guests must be between 1 and 20.';
     }
-    
     if (!in_array($form_data['status'], ['pending', 'confirmed', 'cancelled', 'completed'])) {
         $errors['status'] = 'Invalid status selected.';
     }
-    
+
     if (empty($errors)) {
         try {
             $affected_rows = db_execute(
@@ -95,7 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ],
                 'sssssissi'
             );
-            
+
             if ($affected_rows >= 0) {
                 flash('success', 'Reservation updated successfully!');
                 header('Location: reservation-list.php');

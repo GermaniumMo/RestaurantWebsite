@@ -1,6 +1,17 @@
 <?php
 // Validation helper functions
 
+if (!function_exists('sanitize_input')) {
+    function sanitize_input($data) {
+        if (is_array($data)) {
+            return array_map('sanitize_input', $data);
+        }
+        $data = trim($data);
+        $data = stripslashes($data);
+        $data = htmlspecialchars($data, ENT_QUOTES, 'UTF-8');
+        return $data;
+    }
+}
 
 function validate_required($value, $field_name = 'Field') {
     if (empty(trim($value))) {
@@ -61,7 +72,7 @@ function validate_time($time, $field_name = 'Time') {
 
 function validate_phone($phone, $field_name = 'Phone') {
     // Basic phone validation - adjust regex as needed
-    if (!preg_match('/^\+?[\d\s\-$$$$]{10,}$/', $phone)) {
+    if (!preg_match('/^\+?[\d\s\-]{10,}$/', $phone)) {
         return "$field_name must be a valid phone number.";
     }
     return null;

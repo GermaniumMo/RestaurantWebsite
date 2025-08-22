@@ -3,28 +3,15 @@ require_once 'includes/db.php';
 require_once 'includes/flash.php';
 require_once 'includes/security.php';
 require_once 'includes/auth.php';
-require_once 'includes/csrf.php';
-
-$is_ajax = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
-
-if ($is_ajax) {
-    header('Content-Type: application/json');
-}
 
 // Handle contact form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['send_message'])) {
-    verify_csrf();
-    
     $first_name = sanitize_input($_POST['first_name'] ?? '');
     $last_name = sanitize_input($_POST['last_name'] ?? '');
     $email = sanitize_input($_POST['email'] ?? '');
     $message = sanitize_input($_POST['message'] ?? '');
     
     if (empty($first_name) || empty($last_name) || empty($email) || empty($message)) {
-        if ($is_ajax) {
-            echo json_encode(['success' => false, 'message' => 'Please fill in all fields.']);
-            exit;
-        }
         flash('error', 'Please fill in all fields.');
     } else {
         try {
@@ -35,23 +22,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['send_message'])) {
             );
             
             if ($result) {
-                if ($is_ajax) {
-                    echo json_encode(['success' => true, 'message' => 'Thank you for your message! We\'ll get back to you soon.']);
-                    exit;
-                }
                 flash('success', 'Thank you for your message! We\'ll get back to you soon.');
             } else {
-                if ($is_ajax) {
-                    echo json_encode(['success' => false, 'message' => 'Sorry, there was an error sending your message. Please try again.']);
-                    exit;
-                }
                 flash('error', 'Sorry, there was an error sending your message. Please try again.');
             }
         } catch (Exception $e) {
-            if ($is_ajax) {
-                echo json_encode(['success' => false, 'message' => 'Sorry, there was an error sending your message. Please try again.']);
-                exit;
-            }
             flash('error', 'Sorry, there was an error sending your message. Please try again.');
         }
     }
@@ -123,8 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['send_message'])) {
             <div class="d-flex w-50 flex-column form-box justify-content-center align-items-center px-4 py-5 rounded-3">  
                 <h2 class="mb-5">Send us a Message</h2>
                 <!-- Updated form to work with PHP backend -->
-                <form id="contactForm" method="POST" class="d-flex flex-column justify-content-center align-items-center w-100 gap-4">
-                    <?= csrf_field() ?>
+                <form method="POST" class="d-flex flex-column justify-content-center align-items-center w-100 gap-4">
                     <div class="flex-row d-flex w-100 gap-4">
                         <input type="text" name="first_name" placeholder="First name" class="w-100 bg-transparent p-3 border border-1 rounded-3" required />
                         <input type="text" name="last_name" placeholder="Last name" class="w-100 bg-transparent p-3 border border-1 rounded-3" required />
@@ -132,10 +106,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['send_message'])) {
                     <div class="flex-column d-flex w-100 gap-4">
                         <input type="email" name="email" placeholder="Email" class="w-100 bg-transparent p-3 border border-1 rounded-3" required />
                         <textarea class="form-control" name="message" placeholder="Type your message here..." rows="5" required></textarea>
-                        <button class="btn w-100 p-3 reservation-btn" type="submit" name="send_message" id="contactSubmitBtn">Send Message</button>
+                        <button class="btn w-100 p-3 reservation-btn" type="submit" name="send_message">Send Message</button>
                     </div>
                 </form>
-                <div id="contactMessage" class="mt-3 w-100" style="display: none;"></div>
             </div>
         </div>
     </section>
@@ -338,50 +311,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['send_message'])) {
                 if (dateInput) {
                     dateInput.min = new Date().toISOString().split('T')[0];
                 }
-                
-                document.getElementById('contactForm').addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    
-                    const submitBtn = document.getElementById('contactSubmitBtn');
-                    const messageDiv = document.getElementById('contactMessage');
-                    const originalText = submitBtn.textContent;
-                    
-                    // Show loading state
-                    submitBtn.disabled = true;
-                    submitBtn.textContent = 'Sending...';
-                    messageDiv.style.display = 'none';
-                    
-                    const formData = new FormData(this);
-                    
-                    fetch('contact.php', {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        messageDiv.style.display = 'block';
-                        if (data.success) {
-                            messageDiv.className = 'alert alert-success mt-3';
-                            messageDiv.textContent = data.message;
-                            this.reset();
-                        } else {
-                            messageDiv.className = 'alert alert-danger mt-3';
-                            messageDiv.textContent = data.message;
-                        }
-                    })
-                    .catch(error => {
-                        messageDiv.style.display = 'block';
-                        messageDiv.className = 'alert alert-danger mt-3';
-                        messageDiv.textContent = 'An error occurred. Please try again.';
-                    })
-                    .finally(() => {
-                        submitBtn.disabled = false;
-                        submitBtn.textContent = originalText;
-                    });
-                });
             });
         </script>
         <script

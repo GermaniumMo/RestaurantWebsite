@@ -70,20 +70,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($errors)) {
         try {
             $menu_item_id = db_insert(
-                "INSERT INTO menu_items (category_id, name, description, price, image_url, is_available, is_featured, display_order, created_at, updated_at) 
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())",
-                [
-                    $form_data['category_id'] ?: null,
-                    $form_data['name'],
-                    $form_data['description'],
-                    $form_data['price'],
-                    $form_data['image_url'] ?: null,
-                    $form_data['is_available'],
-                    $form_data['is_featured'],
-                    $form_data['display_order']
-                ],
-                'issdsiiii'
-            );
+    "INSERT INTO menu_items (category_id, name, description, price, image_url, is_available, is_featured, display_order, created_at, updated_at) 
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())",
+    [
+        $form_data['category_id'] ?: null,
+        $form_data['name'],
+        $form_data['description'],
+        $form_data['price'],
+        $form_data['image_url'] ?: null,
+        $form_data['is_available'],
+        $form_data['is_featured'],
+        $form_data['display_order']
+    ],
+    'issdsiii' // <-- Changed from 'issdsiiii' to 'issdsiii' (8 types)
+);
+
             
             if ($menu_item_id) {
                 flash('success', 'Menu item created successfully!');
