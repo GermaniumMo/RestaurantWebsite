@@ -1,52 +1,52 @@
 <?php
-define('ADMIN_PAGE', true);
-require_once __DIR__ . '/../includes/auth.php';
-require_once __DIR__ . '/../includes/db.php';
-require_once __DIR__ . '/../includes/flash.php';
+    define('ADMIN_PAGE', true);
+    require_once __DIR__ . '/../includes/auth.php';
+    require_once __DIR__ . '/../includes/db.php';
+    require_once __DIR__ . '/../includes/flash.php';
+    require_once __DIR__ . '/../includes/csrf.php';
 
-// Check if user is admin
-if (!is_logged_in() || !has_role('admin')) {
-    header('Location: ../auth/login.php');
-    exit;
-}
+    // Check if user is admin
+    if (! is_logged_in() || ! has_role('admin')) {
+        header('Location: ../auth/login.php');
+        exit;
+    }
 
-$page_title = 'Category Management';
-$current_page = 'categories';
+    $page_title   = 'Category Management';
+    $current_page = 'categories';
 
-// Handle search and filtering
-$search = $_GET['search'] ?? '';
-$status_filter = $_GET['status'] ?? '';
-$page = max(1, intval($_GET['page'] ?? 1));
-$per_page = 10;
-$offset = ($page - 1) * $per_page;
+    // Handle search and filtering
+    $search        = $_GET['search'] ?? '';
+    $status_filter = $_GET['status'] ?? '';
+    $page          = max(1, intval($_GET['page'] ?? 1));
+    $per_page      = 10;
+    $offset        = ($page - 1) * $per_page;
 
-// Build query
-$where_conditions = [];
-$params = [];
+    // Build query
+    $where_conditions = [];
+    $params           = [];
 
-if (!empty($search)) {
-    $where_conditions[] = "name LIKE ?";
-    $params[] = "%$search%";
-}
+    if (! empty($search)) {
+        $where_conditions[] = "name LIKE ?";
+        $params[]           = "%$search%";
+    }
 
-if ($status_filter !== '') {
-    $where_conditions[] = "is_active = ?";
-    $params[] = (int)$status_filter;
-}
+    if ($status_filter !== '') {
+        $where_conditions[] = "is_active = ?";
+        $params[]           = (int) $status_filter;
+    }
 
-$where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
+    $where_clause = ! empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
 
-$count_sql = "SELECT COUNT(*) as count FROM categories $where_clause";
-$count_result = db_fetch_one($count_sql, $params);
-$total_categories = $count_result['count'];
-$total_pages = ceil($total_categories / $per_page);
+    $count_sql        = "SELECT COUNT(*) as count FROM categories $where_clause";
+    $count_result     = db_fetch_one($count_sql, $params);
+    $total_categories = $count_result['count'];
+    $total_pages      = ceil($total_categories / $per_page);
 
-$sql = "SELECT * FROM categories $where_clause ORDER BY display_order ASC, name ASC LIMIT ? OFFSET ?";
-$params[] = $per_page;
-$params[] = $offset;
-$categories = db_fetch_all($sql, $params);
+    $sql               = "SELECT * FROM categories $where_clause ORDER BY display_order ASC, name ASC LIMIT ? OFFSET ?";
+    $params_with_limit = array_merge($params, [$per_page, $offset]);
+    $categories        = db_fetch_all($sql, $params_with_limit);
 
-include 'shared/header.php';
+    include 'shared/header.php';
 ?>
 
 <div class="container-fluid">
@@ -62,13 +62,13 @@ include 'shared/header.php';
                 <div class="card-body">
                     <form method="GET" class="row g-3">
                         <div class="col-md-4">
-                            <input type="text" class="form-control" name="search" placeholder="Search categories..." value="<?= htmlspecialchars($search) ?>">
+                            <input type="text" class="form-control" name="search" placeholder="Search categories..." value="<?php echo htmlspecialchars($search) ?>">
                         </div>
                         <div class="col-md-3">
                             <select name="status" class="form-control">
                                 <option value="">All Status</option>
-                                <option value="1" <?= $status_filter === '1' ? 'selected' : '' ?>>Active</option>
-                                <option value="0" <?= $status_filter === '0' ? 'selected' : '' ?>>Inactive</option>
+                                <option value="1"                                                  <?php echo $status_filter === '1' ? 'selected' : '' ?>>Active</option>
+                                <option value="0"                                                  <?php echo $status_filter === '0' ? 'selected' : '' ?>>Inactive</option>
                             </select>
                         </div>
                         <div class="col-md-2">
@@ -104,25 +104,24 @@ include 'shared/header.php';
                                 </thead>
                                 <tbody>
                                     <?php foreach ($categories as $category): ?>
-                                        <?php
-                                        // Get menu items count for this category
-                                        $menu_count = db_fetch_one("SELECT COUNT(*) as count FROM menu_items WHERE category_id = ?", [$category['id']], 'i');
-                                        ?>
+<?php
+    $menu_count = db_fetch_one("SELECT COUNT(*) as count FROM menu_items WHERE category_id = ?", [$category['id']], 'i');
+?>
                                         <tr>
-                                            <td><?= $category['id'] ?></td>
-                                            <td><?= htmlspecialchars($category['name']) ?></td>
-                                            <td><?= htmlspecialchars(substr($category['description'] ?? '', 0, 50)) ?><?= strlen($category['description'] ?? '') > 50 ? '...' : '' ?></td>
-                                            <td><?= $category['display_order'] ?></td>
+                                            <td><?php echo $category['id'] ?></td>
+                                            <td><?php echo htmlspecialchars($category['name']) ?></td>
+                                            <td><?php echo htmlspecialchars(substr($category['description'] ?? '', 0, 50)) ?><?php echo strlen($category['description'] ?? '') > 50 ? '...' : '' ?></td>
+                                            <td><?php echo $category['display_order'] ?></td>
                                             <td>
-                                                <span class="badge <?= $category['is_active'] ? 'bg-success' : 'bg-secondary' ?>">
-                                                    <?= $category['is_active'] ? 'Active' : 'Inactive' ?>
+                                                <span class="badge                                                                   <?php echo $category['is_active'] ? 'bg-success' : 'bg-secondary' ?>">
+                                                    <?php echo $category['is_active'] ? 'Active' : 'Inactive' ?>
                                                 </span>
                                             </td>
-                                            <td><?= $menu_count['count'] ?> items</td>
+                                            <td><?php echo $menu_count['count'] ?> items</td>
                                             <td>
                                                 <div class="btn-group btn-group-sm">
-                                                    <a href="category-edit.php?id=<?= $category['id'] ?>" class="btn btn-outline-primary">Edit</a>
-                                                    <button type="button" class="btn btn-outline-danger" onclick="confirmDelete(<?= $category['id'] ?>, '<?= htmlspecialchars($category['name']) ?>')">Delete</button>
+                                                    <a href="category-edit.php?id=<?php echo $category['id'] ?>" class="btn btn-outline-primary">Edit</a>
+                                                    <button type="button" class="btn btn-outline-danger" onclick="confirmDelete(<?php echo $category['id'] ?>, '<?php echo htmlspecialchars($category['name']) ?>')">Delete</button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -137,25 +136,25 @@ include 'shared/header.php';
                                 <ul class="pagination justify-content-center">
                                     <?php if ($page > 1): ?>
                                         <li class="page-item">
-                                            <a class="page-link" href="?page=<?= $page - 1 ?>&search=<?= urlencode($search) ?>&status=<?= urlencode($status_filter) ?>">Previous</a>
+                                            <a class="page-link" href="?page=<?php echo $page - 1 ?>&search=<?php echo urlencode($search) ?>&status=<?php echo urlencode($status_filter) ?>">Previous</a>
                                         </li>
                                     <?php endif; ?>
-                                    
+
                                     <?php for ($i = max(1, $page - 2); $i <= min($total_pages, $page + 2); $i++): ?>
-                                        <li class="page-item <?= $i === $page ? 'active' : '' ?>">
-                                            <a class="page-link" href="?page=<?= $i ?>&search=<?= urlencode($search) ?>&status=<?= urlencode($status_filter) ?>"><?= $i ?></a>
+                                        <li class="page-item<?php echo $i === $page ? 'active' : '' ?>">
+                                            <a class="page-link" href="?page=<?php echo $i ?>&search=<?php echo urlencode($search) ?>&status=<?php echo urlencode($status_filter) ?>"><?php echo $i ?></a>
                                         </li>
                                     <?php endfor; ?>
-                                    
+
                                     <?php if ($page < $total_pages): ?>
                                         <li class="page-item">
-                                            <a class="page-link" href="?page=<?= $page + 1 ?>&search=<?= urlencode($search) ?>&status=<?= urlencode($status_filter) ?>">Next</a>
+                                            <a class="page-link" href="?page=<?php echo $page + 1 ?>&search=<?php echo urlencode($search) ?>&status=<?php echo urlencode($status_filter) ?>">Next</a>
                                         </li>
                                     <?php endif; ?>
                                 </ul>
                             </nav>
                         <?php endif; ?>
-                    <?php endif; ?>
+<?php endif; ?>
                 </div>
             </div>
         </div>
@@ -177,8 +176,9 @@ include 'shared/header.php';
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <form method="POST" action="category-delete.php" class="d-inline">
+                <form method="POST" action="category-delete.php" class="d-inline" id="deleteCategoryForm">
                     <input type="hidden" name="category_id" id="deleteCategoryId">
+                    <?php echo csrf_field(); ?>
                     <button type="submit" class="btn btn-danger">Delete Category</button>
                 </form>
             </div>

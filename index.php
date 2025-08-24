@@ -1,7 +1,7 @@
 <?php
-require_once __DIR__ . '/includes/auth.php';
-require_once __DIR__ . '/includes/flash.php';
-require_once __DIR__ . '/includes/csrf.php';
+    require_once __DIR__ . '/includes/auth.php';
+    require_once __DIR__ . '/includes/flash.php';
+    require_once __DIR__ . '/includes/csrf.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -51,10 +51,10 @@ require_once __DIR__ . '/includes/csrf.php';
         </ul>
         <div class="d-flex gap-3">
           <?php if (is_logged_in()): ?>
-            <?php $user = current_user(); ?>
+<?php $user = current_user(); ?>
             <div class="dropdown">
               <button class="btn btn-Reserve dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <?= htmlspecialchars($user['name']) ?>
+                <?php echo htmlspecialchars($user['name']) ?>
               </button>
               <ul class="dropdown-menu">
                 <?php if (has_role('admin')): ?>
@@ -163,7 +163,7 @@ require_once __DIR__ . '/includes/csrf.php';
         <div class="d-flex flex-row justify-content-between gap-4">
           <div class="card" style="width: 24.666rem">
             <img
-              src="images/food/pexels-crysnet-11653557.jpg"
+              src="images/pan-seared-scallops.png"
               class="card-img-top shadow"
               alt="Grilled Sea Bass Image" />
             <div class="card-body">
@@ -176,7 +176,7 @@ require_once __DIR__ . '/includes/csrf.php';
           </div>
           <div class="card" style="width: 24.666rem">
             <img
-              src="images/food/Steak.png"
+              src="images/-prime-ribeye-steak----28-day-aged-beef-with-roast.png"
               class="card-img-top shadow"
               alt="Prime Ribeye Steak Image" />
             <div class="card-body">
@@ -189,7 +189,7 @@ require_once __DIR__ . '/includes/csrf.php';
           </div>
           <div class="card" style="width: 24.666rem">
             <img
-              src="images/food/chocolate.png"
+              src="images/-chocolate-symphony----dark-chocolate-mousse-with-.png"
               class="card-img-top shadow"
               alt="Chocolate Symphony Image" />
             <div class="card-body">
@@ -236,10 +236,10 @@ require_once __DIR__ . '/includes/csrf.php';
           <div class="col-lg-6">
             <h2 class="section-title">Make a Reservation</h2>
             <p class="section-subtitle">Book your table for an unforgettable dining experience</p>
-            
+
             <?php if (is_logged_in()): ?>
               <form id="reservationForm" method="POST" action="process_reservation.php">
-                <?= csrf_field() ?>
+                <?php echo csrf_field() ?>
                 <div class="row">
                   <div class="col-md-6 mb-3">
                     <label for="name" class="form-label">Full Name</label>

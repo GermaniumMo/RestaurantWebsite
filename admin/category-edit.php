@@ -1,140 +1,155 @@
 <?php
-define('ADMIN_PAGE', true);
-require_once __DIR__ . '/../includes/auth.php';
-require_once __DIR__ . '/../includes/csrf.php';
-require_once __DIR__ . '/../includes/flash.php';
-require_once __DIR__ . '/../includes/validation.php';
-require_once __DIR__ . '/../includes/security.php'; // Added missing security.php include for sanitize_input function
+    define('ADMIN_PAGE', true);
+    require_once __DIR__ . '/../includes/auth.php';
+    require_once __DIR__ . '/../includes/db.php';
+    require_once __DIR__ . '/../includes/flash.php';
+    require_once __DIR__ . '/../includes/csrf.php';
+    require_once __DIR__ . '/../includes/validation.php';
 
-// Require admin role
-require_role('admin');
-
-$page_title = 'Edit Category';
-$current_page = 'categories';
-
-$category_id = (int)($_GET['id'] ?? 0);
-if (!$category_id) {
-    flash('error', 'Invalid category ID.');
-    header('Location: category-list.php');
-    exit;
-}
-
-// Get category
-$category = db_fetch_one("SELECT * FROM categories WHERE id = ?", [$category_id], 'i');
-if (!$category) {
-    flash('error', 'Category not found.');
-    header('Location: category-list.php');
-    exit;
-}
-
-$page_subtitle = 'Edit: ' . $category['name'];
-
-$errors = [];
-$form_data = $category;
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    verify_csrf();
-    
-    $form_data = [
-        'name' => sanitize_input($_POST['name'] ?? ''),
-        'description' => sanitize_input($_POST['description'] ?? ''),
-        'display_order' => (int)($_POST['display_order'] ?? 0),
-        'is_active' => isset($_POST['is_active']) ? 1 : 0
-    ];
-    
-    // Validation
-    if (empty($form_data['name'])) {
-        $errors['name'] = 'Category name is required.';
-    } elseif (strlen($form_data['name']) > 100) {
-        $errors['name'] = 'Category name cannot exceed 100 characters.';
+    // Check admin
+    if (! is_logged_in() || ! has_role('admin')) {
+        header('Location: ../auth/login.php');
+        exit;
     }
-    
-    if (empty($errors)) {
-        try {
-            $affected_rows = db_execute(
-                "UPDATE categories SET name = ?, description = ?, display_order = ?, is_active = ?, updated_at = NOW() WHERE id = ?",
-                [
-                    $form_data['name'],
-                    $form_data['description'],
-                    $form_data['display_order'],
-                    $form_data['is_active'],
-                    $category_id
-                ],
-                'ssiii'
-            );
-            
-            if ($affected_rows > 0) {
-                flash('success', 'Category updated successfully!');
+
+    // Get category ID
+    $category_id = (int) ($_GET['id'] ?? 0);
+    if (! $category_id) {
+        flash('error', 'Invalid category ID.');
+        header('Location: category-list.php');
+        exit;
+    }
+
+    // Fetch category
+    $category = db_fetch_one("SELECT * FROM categories WHERE id = ?", [$category_id], 'i');
+    if (! $category) {
+        flash('error', 'Category not found.');
+        header('Location: category-list.php');
+        exit;
+    }
+
+    // Initialize form values
+    $form_name        = $category['name'];
+    $form_description = $category['description'] ?? '';
+    $form_display     = (int) $category['display_order'];
+    $form_is_active   = (int) $category['is_active'];
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        if (! verify_csrf()) {
+            flash('error', 'Invalid security token.');
+            header('Location: category-edit.php?id=' . $category_id);
+            exit;
+        }
+
+        // POST values
+        $form_name        = trim($_POST['name'] ?? $form_name);
+        $form_description = trim($_POST['description'] ?? $form_description);
+        $form_display     = (int) ($_POST['display_order'] ?? $form_display);
+        $form_is_active   = isset($_POST['is_active']) ? 1 : 0;
+
+        $errors = [];
+
+        // Validation
+        if (empty($form_name)) {
+            $errors[] = 'Name is required.';
+        }
+
+        // Check for duplicate name (ignore current category)
+        $existing = db_fetch_one(
+            "SELECT id FROM categories WHERE name = ? AND id != ? LIMIT 1",
+            [$form_name, $category_id],
+            "si"
+        );
+        if ($existing) {
+            $errors[] = 'Another category already has this name.';
+        }
+
+        if (empty($errors)) {
+            // Update category
+            $sql = "UPDATE categories
+                   SET name = ?, description = ?, display_order = ?, is_active = ?, updated_at = NOW()
+                   WHERE id = ?";
+            $params = [$form_name, $form_description, $form_display, $form_is_active, $category_id];
+            $types  = "ssiii";
+
+            try {
+                $rows = db_execute($sql, $params, $types);
+
+                if ($rows === false) {
+                    throw new Exception("Database execution failed.");
+                }
+
+                if ($rows === 0) {
+                    flash('info', 'No changes detected.');
+                } else {
+                    flash('success', 'Category updated successfully.');
+                }
+
                 header('Location: category-list.php');
                 exit;
-            } else {
-                $errors['general'] = 'No changes were made or category not found.';
+
+            } catch (Exception $e) {
+                flash('error', 'Database error: ' . $e->getMessage());
             }
-        } catch (Exception $e) {
-            $errors['general'] = 'An error occurred while updating the category.';
+        } else {
+            flash('error', implode('<br>', $errors));
         }
     }
-}
 
-include 'shared/header.php';
+    include 'shared/header.php';
 ?>
 
-<div class="admin-card">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="mb-0" style="font-family: 'Cormorant Garamond', serif;">Edit Category</h3>
-        <a href="category-list.php" class="btn btn-outline-secondary">
-            <i class="me-2">←</i> Back to Categories
-        </a>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Edit Category</h2>
+                <a href="category-list.php" class="btn btn-secondary">Back to Categories</a>
+            </div>
+
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-body">
+                            <?php flash_show_all(); ?>
+
+                            <form method="POST">
+                                <?php echo csrf_field(); ?>
+
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Category Name</label>
+                                    <input type="text" class="form-control" id="name" name="name"
+                                           value="<?php echo htmlspecialchars($form_name); ?>" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="description" class="form-label">Description</label>
+                                    <textarea class="form-control" id="description" name="description"><?php echo htmlspecialchars($form_description); ?></textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="display_order" class="form-label">Display Order</label>
+                                    <input type="number" class="form-control" id="display_order" name="display_order"
+                                           value="<?php echo $form_display; ?>" required>
+                                </div>
+
+                                <div class="mb-3 form-check">
+                                    <input class="form-check-input" type="checkbox" id="is_active" name="is_active"
+                                           <?php echo $form_is_active ? 'checked' : ''; ?>>
+                                    <label class="form-check-label" for="is_active">Active</label>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">Update Category</button>
+                                <a href="category-list.php" class="btn btn-secondary">Cancel</a>
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </div>
-
-    <?php if (!empty($errors['general'])): ?>
-        <div class="alert alert-danger"><?= htmlspecialchars($errors['general']) ?></div>
-    <?php endif; ?>
-
-    <form method="POST" class="row g-3">
-        <?= csrf_field() ?>
-        
-        <div class="col-md-8">
-            <label for="name" class="form-label">Category Name *</label>
-            <input type="text" class="form-control <?= !empty($errors['name']) ? 'is-invalid' : '' ?>" 
-                   id="name" name="name" value="<?= htmlspecialchars($form_data['name']) ?>" required>
-            <?php if (!empty($errors['name'])): ?>
-                <div class="invalid-feedback"><?= htmlspecialchars($errors['name']) ?></div>
-            <?php endif; ?>
-        </div>
-
-        <div class="col-md-4">
-            <label for="display_order" class="form-label">Display Order</label>
-            <input type="number" class="form-control" id="display_order" name="display_order" 
-                   value="<?= htmlspecialchars($form_data['display_order']) ?>" min="0">
-            <div class="form-text">Lower numbers appear first</div>
-        </div>
-
-        <div class="col-12">
-            <label for="description" class="form-label">Description</label>
-            <textarea class="form-control" id="description" name="description" rows="3" 
-                      placeholder="Describe this category..."><?= htmlspecialchars($form_data['description']) ?></textarea>
-        </div>
-
-        <div class="col-12">
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="is_active" name="is_active" 
-                       <?= $form_data['is_active'] ? 'checked' : '' ?>>
-                <label class="form-check-label" for="is_active">
-                    Active Category
-                </label>
-                <div class="form-text">Inactive categories won't be shown to customers</div>
-            </div>
-        </div>
-
-        <div class="col-12">
-            <hr>
-            <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-primary">Update Category</button>
-                <a href="category-list.php" class="btn btn-secondary">Cancel</a>
-            </div>
-        </div>
-    </form>
 </div>
 
 <?php include 'shared/footer.php'; ?>

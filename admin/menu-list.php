@@ -1,99 +1,105 @@
 <?php
-define('ADMIN_PAGE', true);
-require_once __DIR__ . '/../includes/auth.php';
-require_once __DIR__ . '/../includes/flash.php';
-require_once __DIR__ . '/../includes/security.php';  // for sanitize_input
-require_once __DIR__ . '/../includes/csrf.php';      // ✅ needed so csrf_field() works
+    define('ADMIN_PAGE', true);
 
-// Require admin role
-require_role('admin');
+    require_once __DIR__ . '/../includes/auth.php';
+    require_once __DIR__ . '/../includes/flash.php';
+    require_once __DIR__ . '/../includes/validation.php'; // contains sanitize_input()
+    require_once __DIR__ . '/../includes/security.php';   // security headers, rate limiting, logging
+    require_once __DIR__ . '/../includes/csrf.php';       // csrf_field()
 
-$page_title = 'Menu Items';
-$page_subtitle = 'Manage your restaurant menu';
-$current_page = 'menu';
+    // Require admin role
+    require_role('admin');
 
-// Pagination & Filters
-$page = max(1, (int)($_GET['page'] ?? 1));
-$search = sanitize_input($_GET['search'] ?? '');
-$category_filter = (int)($_GET['category'] ?? 0);
-$status_filter = $_GET['status'] ?? '';
-$limit = ITEMS_PER_PAGE;
-$offset = ($page - 1) * $limit;
+    $page_title    = 'Menu Items';
+    $page_subtitle = 'Manage your restaurant menu';
+    $current_page  = 'menu';
 
-// Build WHERE
-$where_conditions = [];
-$params = [];
-$types = '';
+    // Pagination & Filters
+    $page            = max(1, (int) ($_GET['page'] ?? 1));
+    $search          = sanitize_input($_GET['search'] ?? '');
+    $category_filter = (int) ($_GET['category'] ?? 0);
+    $status_filter   = $_GET['status'] ?? '';
+    $limit           = ITEMS_PER_PAGE;
+    $offset          = ($page - 1) * $limit;
 
-if (!empty($search)) {
-    $where_conditions[] = "(m.name LIKE ? OR m.description LIKE ?)";
-    $search_param = "%$search%";
-    $params[] = $search_param;
-    $params[] = $search_param;
-    $types .= 'ss';
-}
+    // Build WHERE clause
+    $where_conditions = [];
+    $params           = [];
+    $types            = '';
 
-if ($category_filter > 0) {
-    $where_conditions[] = "m.category_id = ?";
-    $params[] = $category_filter;
-    $types .= 'i';
-}
+    if (! empty($search)) {
+        $where_conditions[] = "(m.name LIKE ? OR m.description LIKE ?)";
+        $search_param       = "%$search%";
+        $params[]           = $search_param;
+        $params[]           = $search_param;
+        $types .= 'ss';
+    }
 
-if ($status_filter === 'available') {
-    $where_conditions[] = "m.is_available = 1";
-} elseif ($status_filter === 'unavailable') {
-    $where_conditions[] = "m.is_available = 0";
-}
+    if ($category_filter > 0) {
+        $where_conditions[] = "m.category_id = ?";
+        $params[]           = $category_filter;
+        $types .= 'i';
+    }
 
-$where_clause = $where_conditions ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
+    if ($status_filter === 'available') {
+        $where_conditions[] = "m.is_available = 1";
+    } elseif ($status_filter === 'unavailable') {
+        $where_conditions[] = "m.is_available = 0";
+    }
 
-// Totals
-$count_sql = "SELECT COUNT(*) as total FROM menu_items m $where_clause";
-$total_items = db_fetch_one($count_sql, $params, $types)['total'];
-$total_pages = max(1, (int)ceil($total_items / $limit));
+    $where_clause = $where_conditions ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
 
-// Data
-$sql = "SELECT m.*, c.name as category_name 
-        FROM menu_items m 
-        LEFT JOIN categories c ON m.category_id = c.id 
-        $where_clause 
-        ORDER BY m.display_order ASC, m.created_at DESC 
+    // Totals
+    $count_sql   = "SELECT COUNT(*) as total FROM menu_items m $where_clause";
+    $total_items = db_fetch_one($count_sql, $params, $types)['total'];
+    $total_pages = max(1, (int) ceil($total_items / $limit));
+
+    // Fetch menu items
+    $sql = "SELECT m.*, c.name as category_name
+        FROM menu_items m
+        LEFT JOIN categories c ON m.category_id = c.id
+        $where_clause
+        ORDER BY m.display_order ASC, m.created_at DESC
         LIMIT ? OFFSET ?";
-$params[] = $limit;
-$params[] = $offset;
-$types .= 'ii';
+    $params[] = $limit;
+    $params[] = $offset;
+    $types .= 'ii';
 
-$menu_items = db_fetch_all($sql, $params, $types);
+    $menu_items = db_fetch_all($sql, $params, $types);
 
-// Filters
-$categories = db_fetch_all("SELECT * FROM categories WHERE is_active = 1 ORDER BY display_order ASC");
+    // Filters
+    $categories = db_fetch_all("SELECT * FROM categories WHERE is_active = 1 ORDER BY display_order ASC");
 
-include 'shared/header.php';
+    include 'shared/header.php';
 ?>
 
 <div class="admin-card">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h3 class="mb-0" style="font-family: 'Cormorant Garamond', serif;">Menu Items</h3>
-            <small class="text-muted"><?= number_format($total_items) ?> total items</small>
+            <small class="text-muted"><?php echo number_format($total_items) ?> total items</small>
         </div>
         <a href="menu-create.php" class="btn btn-primary">
             <i class="me-2">➕</i> Add Menu Item
         </a>
     </div>
 
+    <!-- Flash Messages -->
+    <?php flash_show('success'); ?>
+<?php flash_show('error'); ?>
+
     <!-- Filters -->
     <form method="GET" class="row g-3 mb-4">
         <div class="col-md-4">
             <input type="text" name="search" class="form-control" placeholder="Search menu items..."
-                   value="<?= htmlspecialchars($search) ?>">
+                   value="<?php echo htmlspecialchars($search) ?>">
         </div>
         <div class="col-md-3">
             <select name="category" class="form-select">
                 <option value="">All Categories</option>
                 <?php foreach ($categories as $category): ?>
-                    <option value="<?= $category['id'] ?>" <?= $category_filter == $category['id'] ? 'selected' : '' ?>>
-                        <?= htmlspecialchars($category['name']) ?>
+                    <option value="<?php echo $category['id'] ?>"<?php echo $category_filter == $category['id'] ? 'selected' : '' ?>>
+                        <?php echo htmlspecialchars($category['name']) ?>
                     </option>
                 <?php endforeach; ?>
             </select>
@@ -101,8 +107,8 @@ include 'shared/header.php';
         <div class="col-md-3">
             <select name="status" class="form-select">
                 <option value="">All Status</option>
-                <option value="available" <?= $status_filter === 'available' ? 'selected' : '' ?>>Available</option>
-                <option value="unavailable" <?= $status_filter === 'unavailable' ? 'selected' : '' ?>>Unavailable</option>
+                <option value="available"                                                                                   <?php echo $status_filter === 'available' ? 'selected' : '' ?>>Available</option>
+                <option value="unavailable"                                                                                       <?php echo $status_filter === 'unavailable' ? 'selected' : '' ?>>Unavailable</option>
             </select>
         </div>
         <div class="col-md-2">
@@ -136,39 +142,39 @@ include 'shared/header.php';
                         <td>
                             <div class="d-flex align-items-center">
                                 <?php if ($item['image_url']): ?>
-                                    <img src="<?= htmlspecialchars($item['image_url']) ?>"
-                                         alt="<?= htmlspecialchars($item['name']) ?>"
+                                    <img src="<?php echo htmlspecialchars($item['image_url']) ?>"
+                                         alt="<?php echo htmlspecialchars($item['name']) ?>"
                                          class="rounded me-3" style="width:50px;height:50px;object-fit:cover;">
                                 <?php else: ?>
                                     <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center"
                                          style="width:50px;height:50px;">🍽️</div>
                                 <?php endif; ?>
                                 <div>
-                                    <strong><?= htmlspecialchars($item['name']) ?></strong>
+                                    <strong><?php echo htmlspecialchars($item['name']) ?></strong>
                                     <?php if ($item['description']): ?>
-                                        <br><small class="text-muted"><?= htmlspecialchars(mb_substr($item['description'], 0, 60)) ?><?= mb_strlen($item['description']) > 60 ? '…' : '' ?></small>
+                                        <br><small class="text-muted"><?php echo htmlspecialchars(mb_substr($item['description'], 0, 60)) ?><?php echo mb_strlen($item['description']) > 60 ? '…' : '' ?></small>
                                     <?php endif; ?>
                                 </div>
                             </div>
                         </td>
                         <td>
-                            <?= $item['category_name']
-                                ? '<span class="badge bg-secondary">'.htmlspecialchars($item['category_name']).'</span>'
-                                : '<span class="text-muted">No Category</span>' ?>
+                            <?php echo $item['category_name']
+                                ? '<span class="badge bg-secondary">' . htmlspecialchars($item['category_name']) . '</span>'
+                            : '<span class="text-muted">No Category</span>' ?>
                         </td>
-                        <td><strong>$<?= number_format((float)$item['price'], 2) ?></strong></td>
+                        <td><strong>$<?php echo number_format((float) $item['price'], 2) ?></strong></td>
                         <td>
-                            <span class="badge bg-<?= $item['is_available'] ? 'success' : 'danger' ?>">
-                                <?= $item['is_available'] ? 'Available' : 'Unavailable' ?>
+                            <span class="badge bg-<?php echo $item['is_available'] ? 'success' : 'danger' ?>">
+                                <?php echo $item['is_available'] ? 'Available' : 'Unavailable' ?>
                             </span>
                         </td>
-                        <td><?= $item['is_featured'] ? '<span class="badge bg-warning">Featured</span>' : '' ?></td>
-                        <td><small class="text-muted"><?= (int)$item['display_order'] ?></small></td>
+                        <td><?php echo $item['is_featured'] ? '<span class="badge bg-warning">Featured</span>' : '' ?></td>
+                        <td><small class="text-muted"><?php echo (int) $item['display_order'] ?></small></td>
                         <td>
                             <div class="btn-group btn-group-sm">
-                                <a href="menu-edit.php?id=<?= (int)$item['id'] ?>" class="btn btn-outline-primary">Edit</a>
+                                <a href="menu-edit.php?id=<?php echo (int) $item['id'] ?>" class="btn btn-outline-primary">Edit</a>
                                 <button type="button" class="btn btn-outline-danger"
-                                        onclick="confirmDelete(<?= (int)$item['id'] ?>, '<?= htmlspecialchars($item['name'], ENT_QUOTES) ?>')">
+                                        onclick="confirmDelete(<?php echo (int) $item['id'] ?>, '<?php echo htmlspecialchars($item['name'], ENT_QUOTES) ?>')">
                                     Delete
                                 </button>
                             </div>
@@ -184,23 +190,23 @@ include 'shared/header.php';
                 <ul class="pagination justify-content-center">
                     <?php if ($page > 1): ?>
                         <li class="page-item">
-                            <a class="page-link" href="?page=<?= $page-1 ?>&search=<?= urlencode($search) ?>&category=<?= $category_filter ?>&status=<?= urlencode($status_filter) ?>">Previous</a>
+                            <a class="page-link" href="?page=<?php echo $page - 1 ?>&search=<?php echo urlencode($search) ?>&category=<?php echo $category_filter ?>&status=<?php echo urlencode($status_filter) ?>">Previous</a>
                         </li>
                     <?php endif; ?>
-                    <?php for ($i = max(1, $page-2); $i <= min($total_pages, $page+2); $i++): ?>
-                        <li class="page-item <?= $i === $page ? 'active' : '' ?>">
-                            <a class="page-link" href="?page=<?= $i ?>&search=<?= urlencode($search) ?>&category=<?= $category_filter ?>&status=<?= urlencode($status_filter) ?>"><?= $i ?></a>
+<?php for ($i = max(1, $page - 2); $i <= min($total_pages, $page + 2); $i++): ?>
+                        <li class="page-item<?php echo $i === $page ? 'active' : '' ?>">
+                            <a class="page-link" href="?page=<?php echo $i ?>&search=<?php echo urlencode($search) ?>&category=<?php echo $category_filter ?>&status=<?php echo urlencode($status_filter) ?>"><?php echo $i ?></a>
                         </li>
                     <?php endfor; ?>
-                    <?php if ($page < $total_pages): ?>
+<?php if ($page < $total_pages): ?>
                         <li class="page-item">
-                            <a class="page-link" href="?page=<?= $page+1 ?>&search=<?= urlencode($search) ?>&category=<?= $category_filter ?>&status=<?= urlencode($status_filter) ?>">Next</a>
+                            <a class="page-link" href="?page=<?php echo $page + 1 ?>&search=<?php echo urlencode($search) ?>&category=<?php echo $category_filter ?>&status=<?php echo urlencode($status_filter) ?>">Next</a>
                         </li>
                     <?php endif; ?>
                 </ul>
             </nav>
         <?php endif; ?>
-    <?php endif; ?>
+<?php endif; ?>
 </div>
 
 <!-- Delete Confirmation Modal -->
@@ -216,7 +222,7 @@ include 'shared/header.php';
           <p>Are you sure you want to delete "<span id="deleteItemName"></span>"?</p>
           <p class="text-muted mb-0">This action cannot be undone.</p>
           <input type="hidden" name="id" id="deleteItemId">
-          <?= csrf_field() ?>
+          <?php echo csrf_field() ?>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -228,24 +234,13 @@ include 'shared/header.php';
 </div>
 
 <?php
-$extra_js = <<<JS
+    $extra_js = <<<JS
 <script>
-// Tiny sanity check: is Bootstrap JS present?
-if (!window.bootstrap) {
-  console.warn('[menu.php] Bootstrap JS not found — modal cannot open.');
-}
-
 function confirmDelete(id, name) {
-  try {
-    console.log('[menu.php] confirmDelete -> id:', id, 'name:', name);
-    document.getElementById('deleteItemId').value = id;
-    document.getElementById('deleteItemName').textContent = name;
-    var m = new bootstrap.Modal(document.getElementById('deleteModal'));
-    m.show();
-  } catch (e) {
-    console.error('[menu.php] confirmDelete error:', e);
-    alert('Unable to open confirmation dialog. See console for details.');
-  }
+  document.getElementById('deleteItemId').value = id;
+  document.getElementById('deleteItemName').textContent = name;
+  var m = new bootstrap.Modal(document.getElementById('deleteModal'));
+  m.show();
 }
 </script>
 JS;

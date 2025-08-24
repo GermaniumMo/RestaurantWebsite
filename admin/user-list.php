@@ -1,56 +1,52 @@
 <?php
-require_once __DIR__ . '/../includes/auth.php';
-require_once __DIR__ . '/../includes/db.php';
-require_once __DIR__ . '/../includes/flash.php';
+    define('ADMIN_PAGE', true);
 
-// Check if user is admin
-if (!is_logged_in() || !has_role('admin')) {
-    header('Location: ../auth/login.php');
-    exit;
-}
+    require_once __DIR__ . '/../includes/auth.php';
+    require_once __DIR__ . '/../includes/db.php';
+    require_once __DIR__ . '/../includes/flash.php';
 
-$db = get_db_connection();
+    // Check admin
+    if (! is_logged_in() || ! has_role('admin')) {
+        header('Location: ../auth/login.php');
+        exit;
+    }
 
-// Handle search and filtering
-$search = $_GET['search'] ?? '';
-$role_filter = $_GET['role'] ?? '';
-$page = max(1, intval($_GET['page'] ?? 1));
-$per_page = 10;
-$offset = ($page - 1) * $per_page;
+    // Handle search and filtering
+    $search      = $_GET['search'] ?? '';
+    $role_filter = $_GET['role'] ?? '';
+    $page        = max(1, intval($_GET['page'] ?? 1));
+    $per_page    = 10;
+    $offset      = ($page - 1) * $per_page;
 
-// Build query
-$where_conditions = [];
-$params = [];
+    // Build WHERE clause
+    $where_conditions = [];
+    $params           = [];
 
-if (!empty($search)) {
-    $where_conditions[] = "(name LIKE ? OR email LIKE ?)";
-    $params[] = "%$search%";
-    $params[] = "%$search%";
-}
+    if (! empty($search)) {
+        $where_conditions[] = "(name LIKE ? OR email LIKE ?)";
+        $params[]           = "%$search%";
+        $params[]           = "%$search%";
+    }
 
-if (!empty($role_filter)) {
-    $where_conditions[] = "role = ?";
-    $params[] = $role_filter;
-}
+    if (! empty($role_filter)) {
+        $where_conditions[] = "role = ?";
+        $params[]           = $role_filter;
+    }
 
-$where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
+    $where_clause = ! empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
 
-// Get total count
-$count_sql = "SELECT COUNT(*) FROM users $where_clause";
-$count_stmt = $db->prepare($count_sql);
-$count_stmt->execute($params);
-$total_users = $count_stmt->fetchColumn();
-$total_pages = ceil($total_users / $per_page);
+    // Get total count
+    $count_sql       = "SELECT COUNT(*) AS cnt FROM users $where_clause";
+    $total_users_row = db_fetch_one($count_sql, $params);
+    $total_users     = $total_users_row['cnt'] ?? 0;
+    $total_pages     = ceil($total_users / $per_page);
 
-// Get users
-$sql = "SELECT * FROM users $where_clause ORDER BY created_at DESC LIMIT ? OFFSET ?";
-$params[] = $per_page;
-$params[] = $offset;
-$stmt = $db->prepare($sql);
-$stmt->execute($params);
-$users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // Get users
+    $sql               = "SELECT * FROM users $where_clause ORDER BY created_at DESC LIMIT ? OFFSET ?";
+    $params_with_limit = array_merge($params, [$per_page, $offset]);
+    $users             = db_fetch_all($sql, $params_with_limit);
 
-include 'shared/header.php';
+    include 'shared/header.php';
 ?>
 
 <div class="container-fluid">
@@ -58,21 +54,26 @@ include 'shared/header.php';
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2>User Management</h2>
-                <a href="user-create.php" class="btn btn-primary">Add New User</a>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createUserModal">
+                    Add New User
+                </button>
             </div>
+
+            <!-- Flash messages -->
+            <?php flash_show_all(); ?>
 
             <!-- Search and Filter -->
             <div class="card mb-4">
                 <div class="card-body">
                     <form method="GET" class="row g-3">
                         <div class="col-md-4">
-                            <input type="text" class="form-control" name="search" placeholder="Search by name or email..." value="<?= htmlspecialchars($search) ?>">
+                            <input type="text" class="form-control" name="search" placeholder="Search by name or email..." value="<?php echo htmlspecialchars($search) ?>">
                         </div>
                         <div class="col-md-3">
                             <select name="role" class="form-control">
                                 <option value="">All Roles</option>
-                                <option value="admin" <?= $role_filter === 'admin' ? 'selected' : '' ?>>Admin</option>
-                                <option value="customer" <?= $role_filter === 'customer' ? 'selected' : '' ?>>Customer</option>
+                                <option value="admin"                                                      <?php echo $role_filter === 'admin' ? 'selected' : '' ?>>Admin</option>
+                                <option value="customer"                                                         <?php echo $role_filter === 'customer' ? 'selected' : '' ?>>Customer</option>
                             </select>
                         </div>
                         <div class="col-md-2">
@@ -109,25 +110,25 @@ include 'shared/header.php';
                                 <tbody>
                                     <?php foreach ($users as $user): ?>
                                         <tr>
-                                            <td><?= $user['id'] ?></td>
-                                            <td><?= htmlspecialchars($user['name']) ?></td>
-                                            <td><?= htmlspecialchars($user['email']) ?></td>
+                                            <td><?php echo $user['id'] ?></td>
+                                            <td><?php echo htmlspecialchars($user['name']) ?></td>
+                                            <td><?php echo htmlspecialchars($user['email']) ?></td>
                                             <td>
-                                                <span class="badge <?= $user['role'] === 'admin' ? 'bg-danger' : 'bg-primary' ?>">
-                                                    <?= ucfirst($user['role']) ?>
+                                                <span class="badge                                                                   <?php echo $user['role'] === 'admin' ? 'bg-danger' : 'bg-primary' ?>">
+                                                    <?php echo ucfirst($user['role']) ?>
                                                 </span>
                                             </td>
                                             <td>
-                                                <span class="badge <?= $user['is_active'] ? 'bg-success' : 'bg-secondary' ?>">
-                                                    <?= $user['is_active'] ? 'Active' : 'Inactive' ?>
+                                                <span class="badge                                                                   <?php echo $user['is_active'] ? 'bg-success' : 'bg-secondary' ?>">
+                                                    <?php echo $user['is_active'] ? 'Active' : 'Inactive' ?>
                                                 </span>
                                             </td>
-                                            <td><?= date('M j, Y', strtotime($user['created_at'])) ?></td>
+                                            <td><?php echo date('M j, Y', strtotime($user['created_at'])) ?></td>
                                             <td>
                                                 <div class="btn-group btn-group-sm">
-                                                    <a href="user-edit.php?id=<?= $user['id'] ?>" class="btn btn-outline-primary">Edit</a>
+                                                    <a href="user-edit.php?id=<?php echo $user['id'] ?>" class="btn btn-outline-primary">Edit</a>
                                                     <?php if ($user['id'] != current_user()['id']): ?>
-                                                        <button type="button" class="btn btn-outline-danger" onclick="confirmDelete(<?= $user['id'] ?>, '<?= htmlspecialchars($user['name']) ?>')">Delete</button>
+                                                        <button type="button" class="btn btn-outline-danger" onclick="confirmDelete(<?php echo $user['id'] ?>, '<?php echo htmlspecialchars($user['name']) ?>')">Delete</button>
                                                     <?php endif; ?>
                                                 </div>
                                             </td>
@@ -143,25 +144,25 @@ include 'shared/header.php';
                                 <ul class="pagination justify-content-center">
                                     <?php if ($page > 1): ?>
                                         <li class="page-item">
-                                            <a class="page-link" href="?page=<?= $page - 1 ?>&search=<?= urlencode($search) ?>&role=<?= urlencode($role_filter) ?>">Previous</a>
+                                            <a class="page-link" href="?page=<?php echo $page - 1 ?>&search=<?php echo urlencode($search) ?>&role=<?php echo urlencode($role_filter) ?>">Previous</a>
                                         </li>
                                     <?php endif; ?>
-                                    
+
                                     <?php for ($i = max(1, $page - 2); $i <= min($total_pages, $page + 2); $i++): ?>
-                                        <li class="page-item <?= $i === $page ? 'active' : '' ?>">
-                                            <a class="page-link" href="?page=<?= $i ?>&search=<?= urlencode($search) ?>&role=<?= urlencode($role_filter) ?>"><?= $i ?></a>
+                                        <li class="page-item<?php echo $i === $page ? 'active' : '' ?>">
+                                            <a class="page-link" href="?page=<?php echo $i ?>&search=<?php echo urlencode($search) ?>&role=<?php echo urlencode($role_filter) ?>"><?php echo $i ?></a>
                                         </li>
                                     <?php endfor; ?>
-                                    
+
                                     <?php if ($page < $total_pages): ?>
                                         <li class="page-item">
-                                            <a class="page-link" href="?page=<?= $page + 1 ?>&search=<?= urlencode($search) ?>&role=<?= urlencode($role_filter) ?>">Next</a>
+                                            <a class="page-link" href="?page=<?php echo $page + 1 ?>&search=<?php echo urlencode($search) ?>&role=<?php echo urlencode($role_filter) ?>">Next</a>
                                         </li>
                                     <?php endif; ?>
                                 </ul>
                             </nav>
                         <?php endif; ?>
-                    <?php endif; ?>
+<?php endif; ?>
                 </div>
             </div>
         </div>
@@ -187,6 +188,49 @@ include 'shared/header.php';
                     <button type="submit" class="btn btn-danger">Delete User</button>
                 </form>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create User Modal -->
+<div class="modal fade" id="createUserModal" tabindex="-1" aria-labelledby="createUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="user-create.php">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createUserModalLabel">Add New User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="userName" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="userName" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="userEmail" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="userEmail" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="userPassword" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="userPassword" name="password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="userRole" class="form-label">Role</label>
+                        <select class="form-control" id="userRole" name="role" required>
+                            <option value="user">User</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="1" id="userActive" name="is_active" checked>
+                        <label class="form-check-label" for="userActive">Active</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create User</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

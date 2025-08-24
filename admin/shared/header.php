@@ -1,17 +1,19 @@
 <?php
-// Shared header for admin pages
-if (!defined('ADMIN_PAGE')) {
-    die('Direct access not allowed');
-}
+    // Shared header for admin pages
+    if (! defined('ADMIN_PAGE')) {
+        die('Direct access not allowed');
+    }
 
-$user = current_user();
+    $user = current_user();
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $page_title ?? 'Admin' ?> - Savoria</title>
+    <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
+
+    <title><?php echo $page_title ?? 'Admin' ?> - Savoria</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
@@ -75,21 +77,21 @@ $user = current_user();
                         <a href="../index.php" style="color: #ea580c; text-decoration: none;">Savoria</a>
                         <small class="d-block text-muted" style="font-size: 0.8rem;">Admin Panel</small>
                     </h2>
-                    
+
                     <nav class="nav flex-column">
-                        <a href="index.php" class="admin-nav-link <?= ($current_page ?? '') === 'dashboard' ? 'active' : '' ?>">
+                        <a href="index.php" class="admin-nav-link                                                                  <?php echo($current_page ?? '') === 'dashboard' ? 'active' : '' ?>">
                             <i class="me-2">📊</i> Dashboard
                         </a>
-                        <a href="menu-list.php" class="admin-nav-link <?= ($current_page ?? '') === 'menu' ? 'active' : '' ?>">
+                        <a href="menu-list.php" class="admin-nav-link                                                                      <?php echo($current_page ?? '') === 'menu' ? 'active' : '' ?>">
                             <i class="me-2">🍽️</i> Menu Items
                         </a>
-                        <a href="reservation-list.php" class="admin-nav-link <?= ($current_page ?? '') === 'reservations' ? 'active' : '' ?>">
+                        <a href="reservation-list.php" class="admin-nav-link                                                                             <?php echo($current_page ?? '') === 'reservations' ? 'active' : '' ?>">
                             <i class="me-2">📅</i> Reservations
                         </a>
-                        <a href="user-list.php" class="admin-nav-link <?= ($current_page ?? '') === 'users' ? 'active' : '' ?>">
+                        <a href="user-list.php" class="admin-nav-link                                                                      <?php echo($current_page ?? '') === 'users' ? 'active' : '' ?>">
                             <i class="me-2">👥</i> Users
                         </a>
-                        <a href="category-list.php" class="admin-nav-link <?= ($current_page ?? '') === 'categories' ? 'active' : '' ?>">
+                        <a href="category-list.php" class="admin-nav-link                                                                          <?php echo($current_page ?? '') === 'categories' ? 'active' : '' ?>">
                             <i class="me-2">📂</i> Categories
                         </a>
                         <hr class="my-3" style="border-color: #374151;">
@@ -111,14 +113,14 @@ $user = current_user();
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <div>
                         <h1 style="font-family: 'Cormorant Garamond', serif; color: #111827;">
-                            <?= $page_title ?? 'Admin Panel' ?>
+                            <?php echo $page_title ?? 'Admin Panel' ?>
                         </h1>
                         <?php if (isset($page_subtitle)): ?>
-                            <p class="text-muted"><?= $page_subtitle ?></p>
+                            <p class="text-muted"><?php echo $page_subtitle ?></p>
                         <?php endif; ?>
                     </div>
                     <div class="text-muted">
-                        Welcome, <?= htmlspecialchars($user['name']) ?>
+                        Welcome,                                 <?php echo htmlspecialchars($user['name']) ?>
                     </div>
                 </div>
 

@@ -5,12 +5,14 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Set flash message
-function flash($type, $message) {
+function flash($type, $message)
+{
     $_SESSION['flash'][$type] = $message;
 }
 
 // Get and remove flash message
-function flash_get($type) {
+function flash_get($type)
+{
     if (isset($_SESSION['flash'][$type])) {
         $message = $_SESSION['flash'][$type];
         unset($_SESSION['flash'][$type]);
@@ -20,7 +22,8 @@ function flash_get($type) {
 }
 
 // Display flash message as Bootstrap alert
-function flash_show($type) {
+function flash_show($type)
+{
     $message = flash_get($type);
     if ($message) {
         $alert_class = '';
@@ -40,7 +43,7 @@ function flash_show($type) {
             default:
                 $alert_class = 'alert-primary';
         }
-        
+
         echo '<div class="alert ' . $alert_class . ' alert-dismissible fade show" role="alert">';
         echo htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
         echo '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
@@ -49,12 +52,14 @@ function flash_show($type) {
 }
 
 // Check if flash message exists
-function has_flash($type) {
+function has_flash($type)
+{
     return isset($_SESSION['flash'][$type]);
 }
 
 // Display all flash messages
-function flash_show_all() {
+function flash_show_all()
+{
     if (isset($_SESSION['flash'])) {
         foreach ($_SESSION['flash'] as $type => $message) {
             flash_show($type);
@@ -63,7 +68,7 @@ function flash_show_all() {
 }
 
 // Clear all flash messages
-function flash_clear() {
+function flash_clear()
+{
     unset($_SESSION['flash']);
 }
-?>
