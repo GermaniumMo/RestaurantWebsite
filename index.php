@@ -14,7 +14,6 @@
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
       rel="stylesheet" />
-
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -23,8 +22,8 @@
     <link rel="stylesheet" href="css/main.css" />
   </head>
   <body>
-    <header class="d-flex top-header w-100 position-absolute left-0">
-      <div class="d-flex justify-content-between py-3 w-100 header-container">
+       <header class="d-flex top-header w-100 position-absolute left-0">
+      <div class="d-flex justify-content-between py-3 w-100 header-container align">
         <h1>Savoria</h1>
         <ul
           class="d-flex list-unstyled gap-4 m-0 justify-content-center align-items-center navbar">
@@ -48,13 +47,18 @@
               >Contact</a
             >
           </li>
+          <li>
+                      <a type="button" href="#reservationForm" style="color: white; text-decoration: none">Reservation</a>
+          </li>
         </ul>
-        <div class="d-flex gap-3">
+             <div class="d-flex gap-3">
           <?php if (is_logged_in()): ?>
-<?php $user = current_user(); ?>
-            <div class="dropdown">
-              <button class="btn btn-Reserve dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <?php echo htmlspecialchars($user['name']) ?>
+            <div class="dropdown relative">
+              <button class="btn btn-profile dropdown-toggle" style="color: white" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M20.5899 22C20.5899 18.13 16.7399 15 11.9999 15C7.25991 15 3.40991 18.13 3.40991 22" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
               </button>
               <ul class="dropdown-menu">
                 <?php if (has_role('admin')): ?>
@@ -70,6 +74,7 @@
                 </li>
               </ul>
             </div>
+                <a class="btn btn-order" type="button" href="menu.php">Order Now</a>
           <?php else: ?>
             <a class="btn btn-Reserve" href="auth/register.php">Sign Up</a>
             <a class="btn btn-order" href="auth/login.php">Login</a>
@@ -79,7 +84,7 @@
     </header>
 
     <!-- Added flash message display -->
-    <?php if (has_flash('success') || has_flash('error') || has_flash('warning') || has_flash('info')): ?>
+    <?php if (flash_show('success') || flash_show('error') || flash_show('warning') || flash_show('info')): ?>
       <div class="container-fluid" style="margin-top: 100px;">
         <div class="row">
           <div class="col-12">
@@ -160,52 +165,50 @@
           <h1>Our Signature Dishes</h1>
           <p>Discover our chef's carefully curated selection</p>
         </div>
-        <div class="d-flex flex-row justify-content-between gap-4">
-          <div class="card" style="width: 24.666rem">
-            <img
+        <div class="row">
+          <div class="col-md-4 mb-4">
+            <div class="card h-100"> <img
               src="images/pan-seared-scallops.png"
               class="card-img-top shadow"
               alt="Grilled Sea Bass Image" />
-            <div class="card-body">
+            <div class="card-body d-flex flex-column">
               <h5 class="card-title">Grilled Sea Bass</h5>
-              <p class="card-text">
+              <p class="card-text flex-grow-1">
                 Fresh Mediterranean sea bass with herbs and lemon butter sauce
               </p>
-              <span>$42</span>
+            <div class="d-flex justify-content-between align-items-center mt-auto">  <span>$42</span></div></div></div>
+           
             </div>
-          </div>
-          <div class="card" style="width: 24.666rem">
-            <img
+             <div class="col-md-4 mb-4">
+              <div class="card h-100"> <img
               src="images/-prime-ribeye-steak----28-day-aged-beef-with-roast.png"
               class="card-img-top shadow"
-              alt="Prime Ribeye Steak Image" />
-            <div class="card-body">
+                alt="Prime Ribeye Steak Image" />
+            <div class="card-body d-flex flex-column">
               <h5 class="card-title">Prime Ribeye Steak</h5>
-              <p class="card-text">
+              <p class="card-text flex-grow-1">
                 28-day aged beef with roasted vegetables and red wine jus
               </p>
-              <span>$56</span>
-            </div>
-          </div>
-          <div class="card" style="width: 24.666rem">
-            <img
+            <div class="d-flex justify-content-between align-items-center mt-auto">   <span>$56</span></div></div></div></div>
+               <div class="col-md-4 mb-4">
+              <div class="card h-100"> <img
               src="images/-chocolate-symphony----dark-chocolate-mousse-with-.png"
               class="card-img-top shadow"
-              alt="Chocolate Symphony Image" />
-            <div class="card-body">
+               alt="Chocolate Symphony Image" />
+            <div class="card-body d-flex flex-column">
               <h5 class="card-title">Chocolate Symphony</h5>
-              <p class="card-text">
-                Dark chocolate mousse with berry compote and gold leaf
+              <p class="card-text flex-grow-1">
+                 Dark chocolate mousse with berry compote and gold leaf
               </p>
-              <span>$18</span>
+            <div class="d-flex justify-content-between align-items-center mt-auto">   <span>$18</span></div></div></div></div>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="w-100 menu-section">
-      <div class="container">
+    <section class="w-100 menu-section features-restaurant">
+      <div class="d-flex flex-column w-100 menu-restaurant gap-5">
         <div class="row">
           <div class="col-12 text-center mb-5">
             <h2 class="section-title">Our Signature Menu</h2>
@@ -215,144 +218,17 @@
         <div class="row" id="menu-items">
           <!-- Menu items will be loaded here -->
         </div>
-        <div class="row">
-          <div class="col-12 text-center mt-4">
-            <?php if (is_logged_in()): ?>
-              <a href="menu.php" class="btn btn-Reserve">View Full Menu & Order</a>
-            <?php else: ?>
-              <a href="menu.php" class="btn btn-Reserve">Browse Our Menu</a>
-              <p class="mt-2 text-muted small">
-                <a href="auth/login.php">Login</a> to place orders and make reservations
-              </p>
-            <?php endif; ?>
-          </div>
-        </div>
       </div>
     </section>
+ <script>
+document.addEventListener('DOMContentLoaded', () => {
+  const dateInput = document.getElementById('date');
+  if (dateInput) {
+    dateInput.min = new Date().toISOString().split('T')[0];
+  }
+});
+</script>
 
-    <section class="w-100 reservation-section">
-      <div class="container">
-        <div class="row">
-          <div class="col-lg-6">
-            <h2 class="section-title">Make a Reservation</h2>
-            <p class="section-subtitle">Book your table for an unforgettable dining experience</p>
-
-            <?php if (is_logged_in()): ?>
-              <form id="reservationForm" method="POST" action="process_reservation.php">
-                <?php echo csrf_field() ?>
-                <div class="row">
-                  <div class="col-md-6 mb-3">
-                    <label for="name" class="form-label">Full Name</label>
-                    <input type="text" class="form-control" id="name" name="name" required>
-                  </div>
-                  <div class="col-md-6 mb-3">
-                    <label for="email" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="email" name="email" required>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="col-md-6 mb-3">
-                    <label for="phone" class="form-label">Phone Number</label>
-                    <input type="tel" class="form-control" id="phone" name="phone" required>
-                  </div>
-                  <div class="col-md-6 mb-3">
-                    <label for="guests" class="form-label">Number of Guests</label>
-                    <select class="form-control" id="guests" name="guests" required>
-                      <option value="">Select guests</option>
-                      <option value="1">1 Guest</option>
-                      <option value="2">2 Guests</option>
-                      <option value="3">3 Guests</option>
-                      <option value="4">4 Guests</option>
-                      <option value="5">5 Guests</option>
-                      <option value="6">6 Guests</option>
-                      <option value="7">7 Guests</option>
-                      <option value="8">8+ Guests</option>
-                    </select>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="col-md-6 mb-3">
-                    <label for="date" class="form-label">Reservation Date</label>
-                    <input type="date" class="form-control" id="date" name="date" required>
-                  </div>
-                  <div class="col-md-6 mb-3">
-                    <label for="time" class="form-label">Reservation Time</label>
-                    <select class="form-control" id="time" name="time" required>
-                      <option value="">Select time</option>
-                      <option value="17:00">5:00 PM</option>
-                      <option value="17:30">5:30 PM</option>
-                      <option value="18:00">6:00 PM</option>
-                      <option value="18:30">6:30 PM</option>
-                      <option value="19:00">7:00 PM</option>
-                      <option value="19:30">7:30 PM</option>
-                      <option value="20:00">8:00 PM</option>
-                      <option value="20:30">8:30 PM</option>
-                      <option value="21:00">9:00 PM</option>
-                    </select>
-                  </div>
-                </div>
-                <div class="mb-3">
-                  <label for="special_requests" class="form-label">Special Requests</label>
-                  <textarea class="form-control" id="special_requests" name="special_requests" rows="3" placeholder="Any dietary restrictions or special occasions?"></textarea>
-                </div>
-                <button type="submit" class="btn btn-Reserve w-100">Make Reservation</button>
-              </form>
-            <?php else: ?>
-              <div class="text-center p-4 border rounded bg-light">
-                <h4 class="mb-3">Ready to Make a Reservation?</h4>
-                <p class="mb-4">Join Savoria to book your table and enjoy exclusive member benefits.</p>
-                <div class="d-flex gap-3 justify-content-center">
-                  <a href="auth/login.php" class="btn btn-Reserve">Login to Reserve</a>
-                  <a href="auth/register.php" class="btn btn-outline-primary">Create Account</a>
-                </div>
-                <p class="mt-3 text-muted small">Already have an account? <a href="auth/login.php">Sign in here</a></p>
-              </div>
-            <?php endif; ?>
-          </div>
-          <div class="col-lg-6">
-            <img src="/placeholder.svg?height=400&width=600" alt="Restaurant Interior" class="img-fluid rounded">
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <footer class="w-100 footer-section">
-      <div class="container">
-        <div class="row">
-          <div class="col-lg-4 mb-4">
-            <h3>Savoria</h3>
-            <p>Experience culinary excellence in the heart of the city. Our passion for fine dining and exceptional service creates unforgettable moments.</p>
-          </div>
-          <div class="col-lg-4 mb-4">
-            <h4>Contact Info</h4>
-            <p><strong>Address:</strong> 123 Gourmet Street, Culinary District</p>
-            <p><strong>Phone:</strong> (555) 123-4567</p>
-            <p><strong>Email:</strong> info@savoria.com</p>
-          </div>
-          <div class="col-lg-4 mb-4">
-            <h4>Opening Hours</h4>
-            <p><strong>Monday - Thursday:</strong> 5:00 PM - 10:00 PM</p>
-            <p><strong>Friday - Saturday:</strong> 5:00 PM - 11:00 PM</p>
-            <p><strong>Sunday:</strong> 4:00 PM - 9:00 PM</p>
-          </div>
-        </div>
-        <hr>
-        <div class="row">
-          <div class="col-12 text-center">
-            <p>&copy; 2024 Savoria. All rights reserved.</p>
-          </div>
-        </div>
-      </div>
-    </footer>
-
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-      crossorigin="anonymous"></script>
-    <script src="js/main.js"></script>
-    <script>
-      // Set minimum date to today
-      document.getElementById('date').min = new Date().toISOString().split('T')[0];
-    </script>
+        <?php include 'includes/footer.php'; ?>
   </body>
 </html>

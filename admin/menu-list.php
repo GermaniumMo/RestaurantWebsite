@@ -142,8 +142,8 @@
                         <td>
                             <div class="d-flex align-items-center">
                                 <?php if ($item['image_url']): ?>
-                                    <img src="<?php echo htmlspecialchars($item['image_url']) ?>"
-                                         alt="<?php echo htmlspecialchars($item['name']) ?>"
+                                   <img src="<?php echo '../' . htmlspecialchars($item['image_url']); ?>"
+         alt="<?php echo htmlspecialchars($item['name']); ?>"
                                          class="rounded me-3" style="width:50px;height:50px;object-fit:cover;">
                                 <?php else: ?>
                                     <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center"
