@@ -1,30 +1,30 @@
 <?php
-require_once __DIR__ . '/includes/auth.php';
-require_once __DIR__ . '/includes/flash.php';
+    require_once __DIR__ . '/includes/auth.php';
+    require_once __DIR__ . '/includes/flash.php';
     require_once __DIR__ . '/includes/csrf.php';
-if (!is_logged_in()) {
-    // Allow viewing menu but restrict ordering functionality
-    $can_order = false;
-} else {
-    $can_order = true;
-}
+    if (! is_logged_in()) {
+        // Allow viewing menu but restrict ordering functionality
+        $can_order = false;
+    } else {
+        $can_order = true;
+    }
 
-// Get categories and menu items
-$categories = db_fetch_all("SELECT * FROM categories WHERE is_active = 1 ORDER BY display_order ASC");
-$menu_items = db_fetch_all(
-    "SELECT m.*, c.name as category_name 
-     FROM menu_items m 
-     LEFT JOIN categories c ON m.category_id = c.id 
-     WHERE m.is_available = 1 
+    // Get categories and menu items
+    $categories = db_fetch_all("SELECT * FROM categories WHERE is_active = 1 ORDER BY display_order ASC");
+    $menu_items = db_fetch_all(
+        "SELECT m.*, c.name as category_name
+     FROM menu_items m
+     LEFT JOIN categories c ON m.category_id = c.id
+     WHERE m.is_available = 1
      ORDER BY c.display_order ASC, m.display_order ASC, m.name ASC"
-);
+    );
 
-// Group menu items by category
-$menu_by_category = [];
-foreach ($menu_items as $item) {
-    $category_name = $item['category_name'] ?: 'Other';
-    $menu_by_category[$category_name][] = $item;
-}
+    // Group menu items by category
+    $menu_by_category = [];
+    foreach ($menu_items as $item) {
+        $category_name                      = $item['category_name'] ?: 'Other';
+        $menu_by_category[$category_name][] = $item;
+    }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -56,18 +56,21 @@ foreach ($menu_items as $item) {
     <?php flash_show_all(); ?>
 
     <!-- Menu Categories Navigation -->
-    <?php if (!empty($categories)): ?>
-        <section class="btn-container">
-            <div class="d-flex justify-content-center flex-wrap gap-2">
-                <button class="btn btn-menu btn-menu-active" onclick="showAllCategories()">All</button>
-                <?php foreach ($categories as $category): ?>
-                    <button class="btn btn-menu" onclick="showCategory('<?= htmlspecialchars($category['name']) ?>')">
-                        <?= htmlspecialchars($category['name']) ?>
-                    </button>
-                <?php endforeach; ?>
-            </div>
-        </section>
-    <?php endif; ?>
+<?php if (! empty($categories)): ?>
+<section class="btn-container position-relative">
+    <div class="d-flex justify-content-center flex-wrap gap-2 position-relative">
+        <div class="active-bg "></div>
+
+        <button class="btn btn-menu btn-menu-active" onclick="showCategoryWithBg(this, 'all')">All</button>
+        <?php foreach ($categories as $category): ?>
+            <button class="btn btn-menu" onclick="showCategoryWithBg(this, '<?php echo htmlspecialchars($category['name']) ?>')">
+                <?php echo htmlspecialchars($category['name']) ?>
+            </button>
+        <?php endforeach; ?>
+    </div>
+</section>
+<?php endif; ?>
+
 
     <!-- Menu Items -->
     <section class="container-menu">
@@ -77,56 +80,62 @@ foreach ($menu_items as $item) {
                 <p class="text-muted">We're working on our delicious menu. Please check back soon!</p>
             </div>
         <?php else: ?>
-            <?php foreach ($menu_by_category as $category_name => $items): ?>
-                <div class="menu-category mb-5" data-category="<?= htmlspecialchars($category_name) ?>">
+<?php foreach ($menu_by_category as $category_name => $items): ?>
+                <div class="menu-category mb-5" data-category="<?php echo htmlspecialchars($category_name) ?>">
                     <h2 class="text-center mb-4" style="font-family: 'Cormorant Garamond', serif; color: #ea580c;">
-                        <?= htmlspecialchars($category_name) ?>
+                        <?php echo htmlspecialchars($category_name) ?>
                     </h2>
-                    
+
                     <div class="row g-4">
                         <?php foreach ($items as $item): ?>
                             <div class="col-md-6 col-lg-4">
                                 <div class="card h-100">
                                     <?php if ($item['image_url']): ?>
-                                        <img src="<?= htmlspecialchars($item['image_url']) ?>" 
-                                             class="card-img-top menu-card-img-top" 
-                                             alt="<?= htmlspecialchars($item['name']) ?>"
+                                        <img src="<?php echo htmlspecialchars($item['image_url']) ?>"
+                                             class="card-img-top menu-card-img-top"
+                                             alt="<?php echo htmlspecialchars($item['name']) ?>"
                                              style="object-fit: cover;">
                                     <?php else: ?>
                                         <div class="card-img-top menu-card-img-top bg-light d-flex align-items-center justify-content-center">
                                             <i style="font-size: 3rem;">🍽️</i>
                                         </div>
                                     <?php endif; ?>
-                                    
+
                                     <div class="card-body d-flex flex-column">
-                                        <h5 class="card-title"><?= htmlspecialchars($item['name']) ?></h5>
+                                        <h5 class="card-title"><?php echo htmlspecialchars($item['name']) ?></h5>
                                         <?php if ($item['description']): ?>
-                                            <p class="card-text flex-grow-1"><?= htmlspecialchars($item['description']) ?></p>
+                                            <p class="card-text flex-grow-1"><?php echo htmlspecialchars($item['description']) ?></p>
                                         <?php endif; ?>
                                         <div class="d-flex justify-content-between align-items-center mt-auto">
                                             <span>
-                                                $<?= number_format($item['price'], 2) ?>
+                                                $<?php echo number_format($item['price'], 2) ?>
                                             </span>
                                             <?php if ($item['is_featured']): ?>
-                                                <span class="badge bg-warning">Featured</span>
+                                                <span style="
+                        color:#ea580c;
+                        font-size:1rem;
+                        border:1px solid #ea580c;
+                        background-color:transparent;
+                        padding:6px 8px;
+                        border-radius:6px; text-shadow: none;">Featured</span>
                                             <?php endif; ?>
                                         </div>
-                                        
+
                                         <!-- Conditional cart functionality based on login status -->
                                         <div class="mt-3">
                                             <?php if ($can_order): ?>
                                                 <div class="d-flex align-items-center justify-content-between">
                                                     <div class="d-flex align-items-center">
-                                                        <button class="btn btn-outline-secondary btn-sm" onclick="decreaseQuantity(<?= $item['id'] ?>)">-</button>
-                                                        <input type="number" id="quantity-<?= $item['id'] ?>" class="form-control mx-2 text-center"
+                                                        <button class="btn btn-outline-secondary btn-sm" onclick="decreaseQuantity(<?php echo $item['id'] ?>)">-</button>
+                                                        <input type="number" id="quantity-<?php echo $item['id'] ?>" class="form-control mx-2 text-center"
                                                                style="width: 60px;" value="1" min="1" max="10">
-                                                        <button class="btn btn-outline-secondary btn-sm" onclick="increaseQuantity(<?= $item['id'] ?>)">+</button>
+                                                        <button class="btn btn-outline-secondary btn-sm" onclick="increaseQuantity(<?php echo $item['id'] ?>)">+</button>
                                                     </div>
-                                                    <button class="btn btn-primary" onclick="addToCart(event, <?= $item['id'] ?>, '<?= htmlspecialchars($item['name'], ENT_QUOTES) ?>', <?= $item['price'] ?>)">
+                                                    <button class="btn btn-primary" onclick="addToCart(event,                                                                                                                                                                                                                                                                       <?php echo $item['id'] ?>, '<?php echo htmlspecialchars($item['name'], ENT_QUOTES) ?>',<?php echo $item['price'] ?>)">
                                                         Add to Cart
                                                     </button>
                                                 </div>
-                                                <button class="btn btn-outline-info btn-sm mt-2 w-100" onclick="viewDetails(<?= $item['id'] ?>, '<?= htmlspecialchars($item['name'], ENT_QUOTES) ?>', '<?= htmlspecialchars($item['description'], ENT_QUOTES) ?>', <?= $item['price'] ?>, '<?= htmlspecialchars($item['image_url']) ?>')">
+                                                <button class="btn btn-details btn-sm mt-2 w-100" onclick="viewDetails(<?php echo $item['id'] ?>, '<?php echo htmlspecialchars($item['name'], ENT_QUOTES) ?>', '<?php echo htmlspecialchars($item['description'], ENT_QUOTES) ?>',<?php echo $item['price'] ?>, '<?php echo htmlspecialchars($item['image_url']) ?>')">
                                                     View Details
                                                 </button>
                                             <?php else: ?>
@@ -146,9 +155,11 @@ foreach ($menu_items as $item) {
                     </div>
                 </div>
             <?php endforeach; ?>
-        <?php endif; ?>
+<?php endif; ?>
+
     </section>
-        <?php include 'includes/footer.php'; ?>
+    <?php include 'includes/footer.php'; ?>
+<script src="js/main.js"></script>
     <!-- Conditional cart sidebar and floating button for logged-in users only -->
     <?php if ($can_order): ?>
         <!-- Cart Sidebar -->
@@ -190,7 +201,7 @@ foreach ($menu_items as $item) {
                                 <div class="mt-3">
                                     <div class="d-flex align-items-center">
                                         <button class="btn btn-outline-secondary btn-sm" onclick="decreaseModalQuantity()">-</button>
-                                        <input type="number" id="modalQuantity" class="form-control mx-2 text-center" 
+                                        <input type="number" id="modalQuantity" class="form-control mx-2 text-center"
                                                style="width: 60px;" value="1" min="1" max="10">
                                         <button class="btn btn-outline-secondary btn-sm" onclick="increaseModalQuantity()">+</button>
                                     </div>
@@ -207,7 +218,7 @@ foreach ($menu_items as $item) {
 
         <!-- Floating Cart Button -->
         <div class="position-fixed bottom-0 end-0 m-4" style="z-index: 1000;">
-            <button class="btn btn-primary rounded-circle p-3 d-flex justify-content-center align-items-center" data-bs-toggle="offcanvas" data-bs-target="#cartSidebar" 
+            <button class="btn btn-primary rounded-circle p-3 d-flex justify-content-center align-items-center" data-bs-toggle="offcanvas" data-bs-target="#cartSidebar"
                     style="width: 60px; height: 60px; position: relative;">
                 <i class="bi bi-cart" style="color: white; font-size: 1.5rem; font-weight: 700;"></i>
                 <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="cartCount" style="display: none;">
@@ -216,7 +227,7 @@ foreach ($menu_items as $item) {
             </button>
         </div>
     <?php endif; ?>
-    
+
     <?php if ($can_order): ?>
         <!-- Only load cart JavaScript for logged-in users -->
         <script>
@@ -229,7 +240,7 @@ foreach ($menu_items as $item) {
                 const cartTotal = document.getElementById('cartTotal');
                 const cartCount = document.getElementById('cartCount');
                 const checkoutBtn = document.getElementById('checkoutBtn');
-                
+
                 if (cart.length === 0) {
                     cartItems.innerHTML = '<p class="text-muted">Your cart is empty</p>';
                     cartTotal.textContent = '0.00';
@@ -237,15 +248,15 @@ foreach ($menu_items as $item) {
                     checkoutBtn.disabled = true;
                     return;
                 }
-                
+
                 let total = 0;
                 let itemCount = 0;
                 cartItems.innerHTML = '';
-                
+
                 cart.forEach((item, index) => {
                     total += item.price * item.quantity;
                     itemCount += item.quantity;
-                    
+
                     const itemDiv = document.createElement('div');
                     itemDiv.className = 'cart-item mb-3 p-2 border rounded';
                     itemDiv.innerHTML = `
@@ -267,12 +278,12 @@ foreach ($menu_items as $item) {
                     `;
                     cartItems.appendChild(itemDiv);
                 });
-                
+
                 cartTotal.textContent = total.toFixed(2);
                 cartCount.textContent = itemCount;
                 cartCount.style.display = itemCount > 0 ? 'block' : 'none';
                 checkoutBtn.disabled = false;
-                
+
                 localStorage.setItem('savoriaCart', JSON.stringify(cart));
             }
 
@@ -309,7 +320,7 @@ foreach ($menu_items as $item) {
             function addToCart(event, itemId, itemName, itemPrice) {
                 const quantity = parseInt(document.getElementById(`quantity-${itemId}`).value);
                 const existingItem = cart.find(item => item.id === itemId);
-                
+
                 if (existingItem) {
                     existingItem.quantity += quantity;
                 } else {
@@ -320,16 +331,16 @@ foreach ($menu_items as $item) {
                         quantity: quantity
                     });
                 }
-                
+
                 updateCartDisplay();
-                
+
                 // Show success message
                 const btn = event.target;
                 const originalText = btn.textContent;
                 btn.textContent = 'Added!';
                 btn.classList.add('btn-success');
                 btn.classList.remove('btn-primary');
-                
+
                 setTimeout(() => {
                     btn.textContent = originalText;
                     btn.classList.add('btn-primary');
@@ -341,7 +352,7 @@ foreach ($menu_items as $item) {
                 if (currentModalItem) {
                     const quantity = parseInt(document.getElementById('modalQuantity').value);
                     const existingItem = cart.find(item => item.id === currentModalItem.id);
-                    
+
                     if (existingItem) {
                         existingItem.quantity += quantity;
                     } else {
@@ -352,9 +363,9 @@ foreach ($menu_items as $item) {
                             quantity: quantity
                         });
                     }
-                    
+
                     updateCartDisplay();
-                    
+
                     // Close modal and show success
                     const modal = bootstrap.Modal.getInstance(document.getElementById('itemDetailsModal'));
                     modal.hide();
@@ -379,12 +390,12 @@ foreach ($menu_items as $item) {
             // View details
             function viewDetails(itemId, itemName, itemDescription, itemPrice, itemImage) {
                 currentModalItem = { id: itemId, name: itemName, price: itemPrice };
-                
+
                 document.getElementById('modalItemName').textContent = itemName;
                 document.getElementById('modalItemDescription').textContent = itemDescription;
                 document.getElementById('modalItemPrice').textContent = itemPrice.toFixed(2);
                 document.getElementById('modalQuantity').value = 1;
-                
+
                 const modalImage = document.getElementById('modalItemImage');
                 if (itemImage) {
                     modalImage.src = itemImage;
@@ -393,7 +404,7 @@ foreach ($menu_items as $item) {
                     modalImage.src = '/placeholder.svg?height=300&width=300';
                     modalImage.alt = itemName;
                 }
-                
+
                 const modal = new bootstrap.Modal(document.getElementById('itemDetailsModal'));
                 modal.show();
             }
@@ -401,7 +412,7 @@ foreach ($menu_items as $item) {
             // Checkout
             function proceedToCheckout() {
                 if (cart.length === 0) return;
-                
+
                 // Show checkout form modal
                 showCheckoutModal();
             }
@@ -471,19 +482,19 @@ foreach ($menu_items as $item) {
                         </div>
                     </div>
                 `;
-                
+
                 // Remove existing modal if any
                 const existingModal = document.getElementById('checkoutModal');
                 if (existingModal) {
                     existingModal.remove();
                 }
-                
+
                 // Add modal to body
                 document.body.insertAdjacentHTML('beforeend', modalHtml);
-                
+
                 // Populate order summary
                 updateCheckoutSummary();
-                
+
                 // Show modal
                 const modal = new bootstrap.Modal(document.getElementById('checkoutModal'));
                 modal.show();
@@ -493,7 +504,7 @@ foreach ($menu_items as $item) {
                 const orderType = document.getElementById('orderType').value;
                 const deliveryGroup = document.getElementById('deliveryAddressGroup');
                 const deliveryAddress = document.getElementById('deliveryAddress');
-                
+
                 if (orderType === 'delivery') {
                     deliveryGroup.style.display = 'block';
                     deliveryAddress.required = true;
@@ -506,10 +517,10 @@ foreach ($menu_items as $item) {
             function updateCheckoutSummary() {
                 const summaryDiv = document.getElementById('checkoutSummary');
                 const totalSpan = document.getElementById('checkoutTotal');
-                
+
                 let total = 0;
                 let summaryHtml = '';
-                
+
                 cart.forEach(item => {
                     const itemTotal = item.price * item.quantity;
                     total += itemTotal;
@@ -520,7 +531,7 @@ foreach ($menu_items as $item) {
                         </div>
                     `;
                 });
-                
+
                 summaryDiv.innerHTML = summaryHtml;
                 totalSpan.textContent = total.toFixed(2);
             }
@@ -528,31 +539,31 @@ foreach ($menu_items as $item) {
             async function submitOrder() {
                 const form = document.getElementById('checkoutForm');
                 const submitBtn = document.getElementById('submitOrderBtn');
-                
+
                 if (!form.checkValidity()) {
                     form.reportValidity();
                     return;
                 }
-                
+
                 // Disable submit button
                 submitBtn.disabled = true;
                 submitBtn.textContent = 'Processing...';
-                
+
                 try {
                     console.log('[v0] Starting checkout process...');
-                    
+
                     // Get CSRF token
                     console.log('[v0] Fetching CSRF token...');
                     const csrfResponse = await fetch('includes/csrf.php?action=get_token');
                     console.log('[v0] CSRF response status:', csrfResponse.status);
-                    
+
                     if (!csrfResponse.ok) {
                         throw new Error('Failed to get CSRF token');
                     }
-                    
+
                     const csrfData = await csrfResponse.json();
                     console.log('[v0] CSRF token received:', csrfData);
-                    
+
                     const orderData = {
                         cart: cart,
                         customer_name: document.getElementById('customerName').value,
@@ -563,9 +574,9 @@ foreach ($menu_items as $item) {
                         notes: document.getElementById('orderNotes').value,
                         csrf_token: csrfData.token
                     };
-                    
+
                     console.log('[v0] Sending order data:', orderData);
-                    
+
                     const response = await fetch('process_checkout.php', {
                         method: 'POST',
                         headers: {
@@ -573,13 +584,13 @@ foreach ($menu_items as $item) {
                         },
                         body: JSON.stringify(orderData)
                     });
-                    
+
                     console.log('[v0] Checkout response status:', response.status);
                     console.log('[v0] Checkout response headers:', response.headers);
-                    
+
                     const responseText = await response.text();
                     console.log('[v0] Raw response:', responseText);
-                    
+
                     let result;
                     try {
                         result = JSON.parse(responseText);
@@ -587,19 +598,19 @@ foreach ($menu_items as $item) {
                         console.error('[v0] JSON parse error:', parseError);
                         throw new Error('Invalid response format: ' + responseText);
                     }
-                    
+
                     console.log('[v0] Parsed result:', result);
-                    
+
                     if (result.success) {
                         // Clear cart
                         cart = [];
                         localStorage.removeItem('savoriaCart');
                         updateCartDisplay();
-                        
+
                         // Close modal
                         const modal = bootstrap.Modal.getInstance(document.getElementById('checkoutModal'));
                         modal.hide();
-                        
+
                         // Show success message
                         alert(`Order placed successfully! Order ID: ${result.order_id}\nTotal: $${result.total_amount.toFixed(2)}`);
                     } else {
@@ -616,33 +627,40 @@ foreach ($menu_items as $item) {
             }
 
             // Existing functions
-            function showAllCategories() {
-                document.querySelectorAll('.menu-category').forEach(category => {
-                    category.style.display = 'block';
-                });
-                
-                // Update active button
-                document.querySelectorAll('.btn-menu').forEach(btn => {
-                    btn.classList.remove('btn-menu-active');
-                });
-                event.target.classList.add('btn-menu-active');
-            }
+       function showCategoryWithBg(button, categoryName) {
+    // Smooth active-bg
+    const bg = document.querySelector(".active-bg");
+    const container = button.parentElement;
+    const rect = button.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+    bg.style.left = (rect.left - containerRect.left) + "px";
+    bg.style.width = rect.width + "px";
 
-            function showCategory(categoryName) {
-                document.querySelectorAll('.menu-category').forEach(category => {
-                    if (category.dataset.category === categoryName) {
-                        category.style.display = 'block';
-                    } else {
-                        category.style.display = 'none';
-                    }
-                });
-                
-                // Update active button
-                document.querySelectorAll('.btn-menu').forEach(btn => {
-                    btn.classList.remove('btn-menu-active');
-                });
-                event.target.classList.add('btn-menu-active');
-            }
+    // Set active class
+    document.querySelectorAll(".btn-menu").forEach((btn) => btn.classList.remove("btn-menu-active"));
+    button.classList.add("btn-menu-active");
+
+    // Show menu categories
+    if (categoryName === 'all') {
+        document.querySelectorAll('.menu-category').forEach(category => category.style.display = 'block');
+    } else {
+        document.querySelectorAll('.menu-category').forEach(category => {
+            category.style.display = category.dataset.category === categoryName ? 'block' : 'none';
+        });
+    }
+}
+document.addEventListener('DOMContentLoaded', function() {
+    updateCartDisplay(); // existing function
+    const activeBtn = document.querySelector('.btn-menu-active');
+    if (activeBtn) {
+        const bg = document.querySelector(".active-bg");
+        const container = activeBtn.parentElement;
+        const rect = activeBtn.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+        bg.style.left = (rect.left - containerRect.left) + "px";
+        bg.style.width = rect.width + "px";
+    }
+});
 
             // Initialize cart display on page load
             document.addEventListener('DOMContentLoaded', function() {
@@ -657,7 +675,7 @@ foreach ($menu_items as $item) {
                 document.querySelectorAll('.menu-category').forEach(category => {
                     category.style.display = 'block';
                 });
-                
+
                 // Update active button
                 document.querySelectorAll('.btn-menu').forEach(btn => {
                     btn.classList.remove('btn-menu-active');
@@ -673,7 +691,7 @@ foreach ($menu_items as $item) {
                         category.style.display = 'none';
                     }
                 });
-                
+
                 // Update active button
                 document.querySelectorAll('.btn-menu').forEach(btn => {
                     btn.classList.remove('btn-menu-active');
@@ -682,5 +700,6 @@ foreach ($menu_items as $item) {
             }
         </script>
     <?php endif; ?>
+
 </body>
 </html>

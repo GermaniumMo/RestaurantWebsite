@@ -1,6 +1,7 @@
 <?php
-require_once 'includes/db.php';
-require_once 'includes/auth.php';
+    require_once 'includes/db.php';
+    require_once 'includes/auth.php';
+    require_once 'includes/csrf.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -10,7 +11,7 @@ require_once 'includes/auth.php';
     <title>About Us - Savoria Restaurant</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
+   <link
       href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
       rel="stylesheet" />
     <link
@@ -133,9 +134,8 @@ require_once 'includes/auth.php';
           <div class="col">
             <div class="card h-100 justify-content-between align-items-center">
               <img
-                src="images/about/Sarah Johnson.png"
+                src="images/about/sarah-johnson---executive-chef.png"
                 class="card-img-top"
-                style="width: 50%"
                 alt="..." />
               <div class="card-body">
                 <h5 class="card-title coreValues-cardTitle text-center">
@@ -150,9 +150,8 @@ require_once 'includes/auth.php';
           <div class="col">
             <div class="card h-100 justify-content-between align-items-center">
               <img
-                src="images/about/David Williams.png"
+                src="images/about/----david-williams-pastry-chef.png"
                 class="card-img-top"
-                style="width: 50%"
                 alt="..." />
               <div class="card-body">
                 <h5 class="card-title coreValues-cardTitle text-center">
@@ -167,9 +166,8 @@ require_once 'includes/auth.php';
           <div class="col">
             <div class="card h-100 justify-content-between align-items-center">
               <img
-                src="images/about/John Martinez.png"
+                src="images/about/--john-martinez----restaurant-manager.png"
                 class="card-img-top"
-                style="width: 50%"
                 alt="..." />
               <div class="card-body">
                 <h5 class="card-title coreValues-cardTitle text-center">
@@ -184,9 +182,8 @@ require_once 'includes/auth.php';
           <div class="col">
             <div class="card h-100 justify-content-between align-items-center">
               <img
-                src="images/about/Michael Doe.png"
+                src="images/about/--michael-doe---head-sommelier.png"
                 class="card-img-top"
-                style="width: 50%"
                 alt="..." />
               <div class="card-body">
                 <h5 class="card-title coreValues-cardTitle text-center">
@@ -201,34 +198,8 @@ require_once 'includes/auth.php';
         </div>
       </div>
     </section>
-
+   <script src="js/main.js"></script>
     <?php include 'includes/footer.php'; ?>
 
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        let currentPage = window.location.pathname.split("/").pop();
-
-        let navLinks = document.querySelectorAll("header a");
-
-        navLinks.forEach((link) => {
-          if (link.getAttribute("href") === currentPage) {
-            link.classList.add("active");
-          }
-        });
-      });
-    </script>
-      <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-      crossorigin="anonymous"></script>
-    <script
-      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
-      integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
-      crossorigin="anonymous"></script>
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
-      integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
-      crossorigin="anonymous"></script>
-    <script src="js/main.js"></script>
   </body>
 </html>

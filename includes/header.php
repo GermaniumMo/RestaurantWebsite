@@ -1,36 +1,36 @@
 <?php
-require_once __DIR__ . '/auth.php';
+    require_once __DIR__ . '/auth.php';
 
-// Get current page name
-$current_page = basename($_SERVER['PHP_SELF']);
+    // Get current page name
+    $current_page = basename($_SERVER['PHP_SELF']);
 ?>
-<header class="d-flex top-header w-100 border-bottom border-dark" style="background-color: white">
+<header class="d-flex top-header w-100 border-bottom border-dark sticky-top" style="background-color: white; top: 0 !important;">
     <div class="d-flex justify-content-between py-3 w-100 header-container align-items-center">
         <h1 style="color: black">
             <a href="index.php" style="color: black; text-decoration: none;">Savoria</a>
         </h1>
         <ul class="d-flex list-unstyled gap-4 m-0 justify-content-center align-items-center navbar">
             <li>
-                <a href="index.php" 
-                   style="text-decoration: none; color: <?= $current_page === 'index.php' ? '#ea580c' : '#4b5563' ?>;">
+                <a href="index.php"
+                   style="text-decoration: none; color:                                                                                                               <?php echo $current_page === 'index.php' ? '#ea580c' : '#4b5563' ?>;">
                    Home
                 </a>
             </li>
             <li>
-                <a href="menu.php" 
-                   style="text-decoration: none; color: <?= $current_page === 'menu.php' ? '#ea580c' : '#4b5563' ?>;">
+                <a href="menu.php"
+                   style="text-decoration: none; color:                                                                                                               <?php echo $current_page === 'menu.php' ? '#ea580c' : '#4b5563' ?>;">
                    Menu
                 </a>
             </li>
             <li>
-                <a href="about.php" 
-                   style="text-decoration: none; color: <?= $current_page === 'about.php' ? '#ea580c' : '#4b5563' ?>;">
+                <a href="about.php"
+                   style="text-decoration: none; color:                                                                                                               <?php echo $current_page === 'about.php' ? '#ea580c' : '#4b5563' ?>;">
                    About
                 </a>
             </li>
             <li>
-                <a href="contact.php" 
-                   style="text-decoration: none; color: <?= $current_page === 'contact.php' ? '#ea580c' : '#4b5563' ?>;">
+                <a href="contact.php"
+                   style="text-decoration: none; color:                                                                                                               <?php echo $current_page === 'contact.php' ? '#ea580c' : '#4b5563' ?>;">
                    Contact
                 </a>
             </li>
@@ -40,7 +40,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
         </ul>
         <div class="d-flex gap-3">
             <?php if (is_logged_in()): ?>
-                <?php $user = current_user(); ?>
+<?php $user = current_user(); ?>
                 <div class="dropdown">
                     <button class="btn btn-profile dropdown-toggle" style="color: #ea580c" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -50,10 +50,10 @@ $current_page = basename($_SERVER['PHP_SELF']);
                     </button>
                     <ul class="dropdown-menu">
                        <li class="dropdown-item" style="pointer-events: none; color: #ea580c">
-        <?= htmlspecialchars($user['name']) ?>
+        <?php echo htmlspecialchars($user['name']) ?>
     </li>
     <li><hr class="dropdown-divider"></li>
-                         
+
                         <?php if (has_role('admin')): ?>
                             <li><a class="dropdown-item" href="admin/index.php">Admin Dashboard</a></li>
                         <?php endif; ?>

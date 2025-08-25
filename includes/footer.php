@@ -50,7 +50,7 @@
                       <option value="7">7 Guests</option>
                       <option value="8">8+ Guests</option>
                     </select>
-                
+
           </div>
         </div>
 
@@ -81,7 +81,7 @@
 <!-- FOOTER SECTION -->
 <section class="d-flex w-100 contactFooter-container justify-content-center align-items-center">
   <div class="w-100 d-flex flex-column contactFooter-innContainer justify-content-center align-items-center" style="padding: 2.5rem 10rem 0 10rem !important;">
-    <div class="d-flex w-100 justify-content-center restaurant-info" style="margin-top: 4rem;">
+    <div class="d-flex w-100 justify-content-center restaurant-info" style="margin-top: 0;">
       <!-- About -->
       <div class="d-flex flex-column gap-3" style="width: 288px">
         <h1 class="title-info">Savoria</h1>
@@ -173,9 +173,8 @@
     </div>
   </div>
 </section>
-<script src="js/main.js"></script>
+
    <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
       crossorigin="anonymous"></script>
-

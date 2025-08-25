@@ -1,5 +1,3 @@
-const cart = [];
-
 document.addEventListener("DOMContentLoaded", () => {
   const reservationForm = document.getElementById("reservationForm");
   if (reservationForm) {
@@ -141,23 +139,22 @@ async function loadFeaturedMenuItems() {
                 <h5 class="card-title">${item.name}</h5>
                 <p class="card-text flex-grow-1">${item.description || ""}</p>
                 <div class="d-flex justify-content-between align-items-center mt-auto">
-                  <span>$${Number.parseFloat(
-                    item.price
-                  ).toFixed(2)}</span>
+                  <span>$${Number.parseFloat(item.price).toFixed(2)}</span>
            ${
-                  item.is_featured
-                    ? `<span style="
+             item.is_featured
+               ? `<span style="
                         color:#ea580c;
                         font-size:1rem;
                         border:1px solid #ea580c;
                         background-color:transparent;
                         padding:6px 8px;
                         border-radius:6px;
+                        text-shadow: none;
                       ">
                         Featured
                       </span>`
-                    : ""
-                }
+               : ""
+           }
                 </div>
               </div>
             </div>

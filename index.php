@@ -2,6 +2,7 @@
     require_once __DIR__ . '/includes/auth.php';
     require_once __DIR__ . '/includes/flash.php';
     require_once __DIR__ . '/includes/csrf.php';
+    $current_page = basename($_SERVER['PHP_SELF']);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -28,10 +29,11 @@
         <ul
           class="d-flex list-unstyled gap-4 m-0 justify-content-center align-items-center navbar">
           <li>
-            <a href="index.php" style="color: white; text-decoration: none"
-              >Home</a
-            >
-          </li>
+                <a href="index.php"
+                   style="text-decoration: none; color:                                                        <?php echo $current_page === 'index.php' ? '#ea580c' : '#4b5563' ?>;">
+                   Home
+                </a>
+            </li>
           <li>
             <a href="menu.php" style="color: white; text-decoration: none"
               >Menu</a
@@ -177,7 +179,7 @@
                 Fresh Mediterranean sea bass with herbs and lemon butter sauce
               </p>
             <div class="d-flex justify-content-between align-items-center mt-auto">  <span>$42</span></div></div></div>
-           
+
             </div>
              <div class="col-md-4 mb-4">
               <div class="card h-100"> <img
@@ -220,6 +222,8 @@
         </div>
       </div>
     </section>
+
+<script src="js/main.js"></script>
  <script>
 document.addEventListener('DOMContentLoaded', () => {
   const dateInput = document.getElementById('date');
