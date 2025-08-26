@@ -100,7 +100,7 @@ CREATE TABLE order_items (
 );
 
 INSERT INTO users (name, email, password_hash, role) VALUES 
-('Admin User', 'admin@savoria.com', 'admin', 'admin');
+('Admin User', 'admin@savoria.com', '$2y$10$swlzkynPBQCAk5JVAtkuw.Am99iL2FQND3yd6uf0Fqyap5xXAV51K', 'admin');
 
 INSERT INTO categories (name, description, display_order) VALUES 
 ('Appetizers', 'Start your meal with our delicious appetizers', 1),
