@@ -2,8 +2,6 @@
 require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/csrf.php';
 require_once __DIR__ . '/includes/security.php';
-
-// Require user to be logged in
 if (!is_logged_in()) {
     header('Content-Type: application/json');
     echo json_encode(['success' => false, 'message' => 'Please log in to manage cart.']);
@@ -37,8 +35,6 @@ try {
     if (!$cart_item_id) {
         throw new Exception('Invalid cart item ID.');
     }
-    
-    // Verify cart item belongs to current user
     $cart_item = db_fetch_one(
         "SELECT id FROM cart_items WHERE id = ? AND user_id = ?",
         [$cart_item_id, $user_id],
@@ -50,11 +46,9 @@ try {
     }
     
     if ($action === 'remove_item') {
-        // Remove item from cart
         db_execute("DELETE FROM cart_items WHERE id = ?", [$cart_item_id], 'i');
         $message = 'Item removed from cart.';
     } else {
-        // Update quantity
         if ($quantity < 1 || $quantity > 10) {
             throw new Exception('Quantity must be between 1 and 10.');
         }
@@ -66,8 +60,7 @@ try {
         );
         $message = 'Cart updated successfully.';
     }
-    
-    // Get updated cart data
+
     $cart_items = db_fetch_all(
         "SELECT ci.id, ci.quantity, mi.name, mi.price 
          FROM cart_items ci 

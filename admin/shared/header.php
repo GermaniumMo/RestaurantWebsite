@@ -1,5 +1,4 @@
 <?php
-    // Shared header for admin pages
     if (! defined('ADMIN_PAGE')) {
         die('Direct access not allowed');
     }
@@ -70,7 +69,6 @@
 <body>
     <div class="container-fluid p-0">
         <div class="row g-0">
-            <!-- Sidebar -->
             <div class="col-md-3 col-lg-2 admin-sidebar">
                 <div class="px-3">
                     <h2 class="text-white mb-4" style="font-family: 'Cormorant Garamond', serif;">
@@ -123,8 +121,5 @@
                         Welcome,                                 <?php echo htmlspecialchars($user['name']) ?>
                     </div>
                 </div>
-
-                <!-- Flash Messages -->
                 <?php flash_show_all(); ?>
 
-                <!-- Page Content -->

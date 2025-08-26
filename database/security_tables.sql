@@ -1,4 +1,3 @@
--- Rate limiting table
 CREATE TABLE IF NOT EXISTS rate_limits (
     id INT AUTO_INCREMENT PRIMARY KEY,
     identifier VARCHAR(255) NOT NULL,
@@ -8,7 +7,6 @@ CREATE TABLE IF NOT EXISTS rate_limits (
     INDEX idx_created_at (created_at)
 );
 
--- Security logs table
 CREATE TABLE IF NOT EXISTS security_logs (
     id INT AUTO_INCREMENT PRIMARY KEY,
     event VARCHAR(100) NOT NULL,
@@ -23,7 +21,6 @@ CREATE TABLE IF NOT EXISTS security_logs (
     INDEX idx_created_at (created_at)
 );
 
--- Password reset tokens table
 CREATE TABLE IF NOT EXISTS password_reset_tokens (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,

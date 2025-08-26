@@ -19,7 +19,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// Get JSON input
 $input = json_decode(file_get_contents('php://input'), true);
 
 if (!$input) {
@@ -27,20 +26,15 @@ if (!$input) {
     echo json_encode(['success' => false, 'message' => 'Invalid JSON data']);
     exit;
 }
-
-// For JSON requests, check the token in the JSON data instead of $_POST
 if (isset($input['csrf_token'])) {
     $_POST['csrf_token'] = $input['csrf_token'];
 }
-
-// Verify CSRF token
 if (!verify_csrf()) {
     http_response_code(403);
     echo json_encode(['success' => false, 'message' => 'Invalid security token']);
     exit;
 }
 
-// Validate required fields
 $required_fields = ['cart', 'customer_name', 'customer_email', 'customer_phone', 'order_type'];
 foreach ($required_fields as $field) {
     if (empty($input[$field])) {
@@ -50,28 +44,23 @@ foreach ($required_fields as $field) {
     }
 }
 
-// Validate cart
 if (!is_array($input['cart']) || empty($input['cart'])) {
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => 'Cart is empty']);
     exit;
 }
 
-// Validate email
 if (!filter_var($input['customer_email'], FILTER_VALIDATE_EMAIL)) {
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => 'Invalid email address']);
     exit;
 }
-
-// Validate order type
 if (!in_array($input['order_type'], ['pickup', 'delivery'])) {
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => 'Invalid order type']);
     exit;
 }
 
-// If delivery, require address
 if ($input['order_type'] === 'delivery' && empty($input['delivery_address'])) {
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => 'Delivery address is required']);
@@ -79,12 +68,10 @@ if ($input['order_type'] === 'delivery' && empty($input['delivery_address'])) {
 }
 
 try {
-    // Start transaction
     db()->beginTransaction();
     
     $user_id = current_user()['id'];
     
-    // Validate menu items and calculate total
     $total_amount = 0;
     $validated_items = [];
     
@@ -92,8 +79,6 @@ try {
         if (!isset($cart_item['id']) || !isset($cart_item['quantity']) || !isset($cart_item['price'])) {
             throw new Exception('Invalid cart item format');
         }
-        
-        // Get menu item from database to verify price and availability
         $menu_item = db_fetch_one(
             "SELECT id, name, price, is_available FROM menu_items WHERE id = ? AND is_available = 1",
             [$cart_item['id']]
@@ -102,8 +87,6 @@ try {
         if (!$menu_item) {
             throw new Exception("Menu item not found or unavailable: " . $cart_item['id']);
         }
-        
-        // Verify price matches (prevent price manipulation)
         if (abs($menu_item['price'] - $cart_item['price']) > 0.01) {
             throw new Exception("Price mismatch for item: " . $menu_item['name']);
         }
@@ -124,8 +107,6 @@ try {
             'special_instructions' => $cart_item['special_instructions'] ?? null
         ];
     }
-    
-    // Create order
     $order_id = db_insert(
         "INSERT INTO orders (user_id, customer_name, customer_email, customer_phone, total_amount, order_type, delivery_address, notes, created_at) 
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())",
@@ -145,8 +126,6 @@ try {
     if (!$order_id) {
         throw new Exception('Failed to create order');
     }
-    
-    // Insert order items
     foreach ($validated_items as $item) {
         $item_inserted = db_insert(
             "INSERT INTO order_items (order_id, menu_item_id, quantity, unit_price, total_price, special_instructions) 
@@ -167,10 +146,8 @@ try {
         }
     }
     
-    // Commit transaction
     db()->commit();
-    
-    // Send success response
+
     echo json_encode([
         'success' => true,
         'message' => 'Order placed successfully!',
@@ -179,7 +156,6 @@ try {
     ]);
     
 } catch (Exception $e) {
-    // Rollback transaction
     db()->rollback();
     
     error_log("Checkout error: " . $e->getMessage());

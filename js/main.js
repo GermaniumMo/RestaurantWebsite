@@ -6,14 +6,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const phoneInput = this.querySelector('input[name="phone"]');
 
-      // --- Phone validation ---
       if (!isValidPhone(phoneInput.value)) {
         showAlert(
           "warning",
           "Please enter a valid phone number (10-15 digits)."
         );
         phoneInput.focus();
-        return; // Stop form submission
+        return;
       }
 
       const submitBtn = this.querySelector('button[type="submit"]');
@@ -31,10 +30,10 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         let data;
         try {
-          data = await response.json(); // read the body once as JSON
+          data = await response.json();
           console.log("[v1] Reservation response:", data);
         } catch (err) {
-          const text = await response.text(); // fallback to text if JSON fails
+          const text = await response.text();
           console.error(
             "[v1] Failed to parse JSON response:",
             err,
@@ -73,7 +72,6 @@ document.addEventListener("DOMContentLoaded", () => {
   loadFeaturedMenuItems();
 });
 
-// --- Phone validation helper ---
 function isValidPhone(phone) {
   const digits = phone.replace(/\D/g, "");
   return digits.length >= 10 && digits.length <= 15;

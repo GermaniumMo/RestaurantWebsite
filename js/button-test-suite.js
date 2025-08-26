@@ -1,4 +1,3 @@
-// Comprehensive button functionality testing suite
 class ButtonTestSuite {
   constructor() {
     this.testResults = []
@@ -13,27 +12,19 @@ class ButtonTestSuite {
   runAllTests() {
     console.log("[v0] Running comprehensive button functionality tests...")
 
-    // Test all form submissions
     this.testReservationForms()
     this.testProfileForms()
     this.testContactForm()
     this.testMenuButtons()
     this.testNavigationButtons()
-
-    // Report results
     this.reportResults()
   }
 
   testReservationForms() {
-    console.log("[v0] Testing reservation forms...")
-
-    // Test main reservation form
     const mainReservationForm = document.getElementById("reservationForm")
     if (mainReservationForm) {
       this.testFormSubmission(mainReservationForm, "Main Reservation Form")
     }
-
-    // Test footer reservation form
     const footerReservationForm = document.getElementById("footerReservationForm")
     if (footerReservationForm) {
       this.testFormSubmission(footerReservationForm, "Footer Reservation Form")
@@ -41,8 +32,6 @@ class ButtonTestSuite {
   }
 
   testProfileForms() {
-    console.log("[v0] Testing profile forms...")
-
     const profileForm = document.getElementById("profileForm")
     if (profileForm) {
       this.testFormSubmission(profileForm, "Profile Update Form")
@@ -55,7 +44,6 @@ class ButtonTestSuite {
   }
 
   testContactForm() {
-    console.log("[v0] Testing contact form...")
 
     const contactForm = document.getElementById("contactForm")
     if (contactForm) {
@@ -64,21 +52,14 @@ class ButtonTestSuite {
   }
 
   testMenuButtons() {
-    console.log("[v0] Testing menu buttons...")
-
-    // Test add to cart buttons
     const addToCartButtons = document.querySelectorAll('[onclick*="addToCart"]')
     addToCartButtons.forEach((button, index) => {
       this.testButtonClick(button, `Add to Cart Button ${index + 1}`)
     })
-
-    // Test quantity buttons
     const quantityButtons = document.querySelectorAll('[onclick*="updateQuantity"]')
     quantityButtons.forEach((button, index) => {
       this.testButtonClick(button, `Quantity Button ${index + 1}`)
     })
-
-    // Test checkout button
     const checkoutButton = document.getElementById("checkoutBtn")
     if (checkoutButton) {
       this.testButtonClick(checkoutButton, "Checkout Button")
@@ -86,15 +67,10 @@ class ButtonTestSuite {
   }
 
   testNavigationButtons() {
-    console.log("[v0] Testing navigation buttons...")
-
-    // Test reservation button in navigation
     const reservationNavButton = document.querySelector('a[href*="#reservation"]')
     if (reservationNavButton) {
       this.testButtonClick(reservationNavButton, "Navigation Reservation Button")
     }
-
-    // Test cancel reservation buttons
     const cancelButtons = document.querySelectorAll(".cancel-reservation-btn")
     cancelButtons.forEach((button, index) => {
       this.testButtonClick(button, `Cancel Reservation Button ${index + 1}`)
@@ -103,13 +79,8 @@ class ButtonTestSuite {
 
   testFormSubmission(form, formName) {
     try {
-      // Check if form has proper event listeners
       const hasSubmitListener = this.hasEventListener(form, "submit")
-
-      // Check if form has CSRF token
       const csrfToken = form.querySelector('input[name="csrf_token"]')
-
-      // Check if submit button exists and is properly configured
       const submitButton = form.querySelector('button[type="submit"]')
 
       const result = {
@@ -134,13 +105,8 @@ class ButtonTestSuite {
 
   testButtonClick(button, buttonName) {
     try {
-      // Check if button is clickable
       const isClickable = !button.disabled && button.style.display !== "none"
-
-      // Check if button has proper onclick or event listeners
       const hasClickHandler = button.onclick || this.hasEventListener(button, "click")
-
-      // Check if button has proper loading states
       const hasLoadingState =
         button.querySelector(".spinner-border") ||
         button.innerHTML.includes("spinner") ||
@@ -167,7 +133,6 @@ class ButtonTestSuite {
   }
 
   hasEventListener(element, eventType) {
-    // Check if element has event listeners (simplified check)
     return (
       element[`on${eventType}`] !== null ||
       element.getAttribute(`on${eventType}`) !== null ||
@@ -176,7 +141,6 @@ class ButtonTestSuite {
   }
 
   getEventListeners(element, eventType) {
-    // Simplified event listener detection
     try {
       return element.getEventListeners ? element.getEventListeners()[eventType] || [] : []
     } catch {
@@ -185,8 +149,6 @@ class ButtonTestSuite {
   }
 
   reportResults() {
-    console.log("[v0] ===== BUTTON FUNCTIONALITY TEST RESULTS =====")
-
     const passed = this.testResults.filter((r) => r.status === "PASS").length
     const failed = this.testResults.filter((r) => r.status === "FAIL").length
     const errors = this.testResults.filter((r) => r.status === "ERROR").length
@@ -196,14 +158,12 @@ class ButtonTestSuite {
     console.log(`[v0] Failed: ${failed}`)
     console.log(`[v0] Errors: ${errors}`)
 
-    // Detailed results
     this.testResults.forEach((result) => {
       if (result.status !== "PASS") {
         console.log(`[v0] ${result.status}: ${result.name}`, result)
       }
     })
 
-    // Create visual report if in browser
     if (typeof document !== "undefined") {
       this.createVisualReport()
     }
@@ -212,7 +172,6 @@ class ButtonTestSuite {
   }
 
   createVisualReport() {
-    // Create a floating test results panel
     const reportPanel = document.createElement("div")
     reportPanel.id = "button-test-report"
     reportPanel.style.cssText = `
@@ -259,7 +218,6 @@ class ButtonTestSuite {
 
     document.body.appendChild(reportPanel)
 
-    // Auto-remove after 10 seconds
     setTimeout(() => {
       if (reportPanel.parentElement) {
         reportPanel.remove()
@@ -268,13 +226,10 @@ class ButtonTestSuite {
   }
 }
 
-// Auto-run tests when page loads
 document.addEventListener("DOMContentLoaded", () => {
-  // Only run tests if URL contains test parameter
   if (window.location.search.includes("test=buttons") || window.location.hash.includes("test-buttons")) {
     new ButtonTestSuite()
   }
 })
 
-// Export for manual testing
 window.ButtonTestSuite = ButtonTestSuite

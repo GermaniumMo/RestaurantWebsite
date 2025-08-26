@@ -1,6 +1,4 @@
 <?php
-
-// Admin document head component
 function render_admin_document_head($title = 'Admin', $additional_css = []) {
 ?>
 <!DOCTYPE html>
@@ -69,13 +67,11 @@ function render_admin_document_head($title = 'Admin', $additional_css = []) {
 <?php
 }
 
-// Admin header with sidebar component
 function render_admin_header($page_title = 'Admin Panel', $page_subtitle = '', $current_page = '') {
     $user = current_user();
 ?>
     <div class="container-fluid p-0">
         <div class="row g-0">
-            <!-- Sidebar -->
             <div class="col-md-3 col-lg-2 admin-sidebar">
                 <div class="px-3">
                     <h2 class="text-white mb-4" style="font-family: 'Cormorant Garamond', serif;">
@@ -112,9 +108,7 @@ function render_admin_header($page_title = 'Admin Panel', $page_subtitle = '', $
                 </div>
             </div>
 
-            <!-- Main Content -->
             <div class="col-md-9 col-lg-10 admin-content">
-                <!-- Header -->
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <div>
                         <h1 style="font-family: 'Cormorant Garamond', serif; color: #111827;">
@@ -129,14 +123,11 @@ function render_admin_header($page_title = 'Admin Panel', $page_subtitle = '', $
                     </div>
                 </div>
 
-                <!-- Flash Messages -->
                 <?php flash_show_all(); ?>
 
-                <!-- Page Content -->
 <?php
 }
 
-// Admin footer component
 function render_admin_footer($extra_js = '') {
 ?>
             </div>
@@ -153,7 +144,6 @@ function render_admin_footer($extra_js = '') {
 <?php
 }
 
-// Admin card component
 function render_admin_card($title, $content, $actions = '') {
 ?>
     <div class="admin-card mb-4">
@@ -170,7 +160,6 @@ function render_admin_card($title, $content, $actions = '') {
 <?php
 }
 
-// Admin stats card component
 function render_admin_stats_card($title, $value, $icon, $color = 'primary') {
 ?>
     <div class="col-md-6 col-lg-3 mb-4">
@@ -185,7 +174,6 @@ function render_admin_stats_card($title, $value, $icon, $color = 'primary') {
 <?php
 }
 
-// Admin table component
 function render_admin_table($headers, $rows, $actions_column = true) {
 ?>
     <div class="table-responsive">

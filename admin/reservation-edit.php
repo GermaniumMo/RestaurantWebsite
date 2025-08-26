@@ -6,7 +6,6 @@ require_once __DIR__ . '/../includes/flash.php';
 require_once __DIR__ . '/../includes/csrf.php';
 require_once __DIR__ . '/../includes/validation.php';
 
-// Require admin role
 require_role('admin');
 
 $page_title = 'Edit Reservation';
@@ -19,7 +18,6 @@ if (!$reservation_id) {
     exit;
 }
 
-// Get reservation
 $reservation = db_fetch_one(
     "SELECT r.*, u.name as user_name FROM reservations r 
      LEFT JOIN users u ON r.user_id = u.id 
@@ -37,16 +35,14 @@ $page_subtitle = 'Edit reservation for ' . $reservation['name'];
 $errors = [];
 $form_data = $reservation;
 
-// Convert reservation date for <input type="date">
 if (!empty($form_data['reservation_date'])) {
     $form_data['reservation_date'] = date('Y-m-d', strtotime($form_data['reservation_date']));
 }
 
-// Convert reservation time to 24-hour for <input type="time">
 if (!empty($form_data['reservation_time'])) {
-    $time = DateTime::createFromFormat('H:i:s', $form_data['reservation_time']); // DB might store as H:i:s
+    $time = DateTime::createFromFormat('H:i:s', $form_data['reservation_time']);
     if (!$time) {
-        $time = DateTime::createFromFormat('h:i A', $form_data['reservation_time']); // fallback
+        $time = DateTime::createFromFormat('h:i A', $form_data['reservation_time']);
     }
     if ($time) {
         $form_data['reservation_time'] = $time->format('H:i');
@@ -69,7 +65,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'status' => sanitize_input($_POST['status'] ?? '')
     ];
 
-    // Convert 12-hour time to 24-hour
     if (!empty($_POST['reservation_time'])) {
         $time = DateTime::createFromFormat('h:i A', $_POST['reservation_time']);
         if (!$time) {
@@ -78,7 +73,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $form_data['reservation_time'] = $time ? $time->format('H:i') : '';
     }
 
-    // Validation
     if (empty($form_data['name'])) {
         $errors['name'] = 'Name is required.';
     }

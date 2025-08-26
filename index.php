@@ -84,8 +84,6 @@
         </div>
       </div>
     </header>
-
-    <!-- Added flash message display -->
     <?php if (flash_show('success') || flash_show('error') || flash_show('warning') || flash_show('info')): ?>
       <div class="container-fluid" style="margin-top: 100px;">
         <div class="row">

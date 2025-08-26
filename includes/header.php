@@ -1,7 +1,6 @@
 <?php
     require_once __DIR__ . '/auth.php';
 
-    // Get current page name
     $current_page = basename($_SERVER['PHP_SELF']);
 ?>
 <header class="d-flex top-header w-100 border-bottom border-dark sticky-top" style="background-color: white; top: 0 !important;">

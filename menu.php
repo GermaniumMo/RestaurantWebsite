@@ -3,13 +3,11 @@
     require_once __DIR__ . '/includes/flash.php';
     require_once __DIR__ . '/includes/csrf.php';
     if (! is_logged_in()) {
-        // Allow viewing menu but restrict ordering functionality
         $can_order = false;
     } else {
         $can_order = true;
     }
 
-    // Get categories and menu items
     $categories = db_fetch_all("SELECT * FROM categories WHERE is_active = 1 ORDER BY display_order ASC");
     $menu_items = db_fetch_all(
         "SELECT m.*, c.name as category_name
@@ -18,8 +16,6 @@
      WHERE m.is_available = 1
      ORDER BY c.display_order ASC, m.display_order ASC, m.name ASC"
     );
-
-    // Group menu items by category
     $menu_by_category = [];
     foreach ($menu_items as $item) {
         $category_name                      = $item['category_name'] ?: 'Other';
@@ -42,7 +38,6 @@
 <body>
    <?php include 'includes/header.php'; ?>
 
-    <!-- Hero Section -->
     <section class="introduction-section">
         <div class="introduction-container">
             <div class="text-center">
@@ -52,10 +47,8 @@
         </div>
     </section>
 
-    <!-- Flash Messages -->
     <?php flash_show_all(); ?>
 
-    <!-- Menu Categories Navigation -->
 <?php if (! empty($categories)): ?>
 <section class="btn-container position-relative">
     <div class="d-flex justify-content-center flex-wrap gap-2 position-relative">
@@ -71,8 +64,6 @@
 </section>
 <?php endif; ?>
 
-
-    <!-- Menu Items -->
     <section class="container-menu">
         <?php if (empty($menu_items)): ?>
             <div class="text-center py-5">
@@ -120,8 +111,6 @@
                         border-radius:6px; text-shadow: none;">Featured</span>
                                             <?php endif; ?>
                                         </div>
-
-                                        <!-- Conditional cart functionality based on login status -->
                                         <div class="mt-3">
                                             <?php if ($can_order): ?>
                                                 <div class="d-flex align-items-center justify-content-between">
@@ -160,9 +149,7 @@
     </section>
     <?php include 'includes/footer.php'; ?>
 <script src="js/main.js"></script>
-    <!-- Conditional cart sidebar and floating button for logged-in users only -->
     <?php if ($can_order): ?>
-        <!-- Cart Sidebar -->
         <div class="offcanvas offcanvas-end" tabindex="-1" id="cartSidebar" aria-labelledby="cartSidebarLabel">
             <div class="offcanvas-header">
                 <h5 class="offcanvas-title" id="cartSidebarLabel">Your Cart</h5>
@@ -180,8 +167,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Item Details Modal -->
         <div class="modal fade" id="itemDetailsModal" tabindex="-1" aria-labelledby="itemDetailsModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
@@ -215,8 +200,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Floating Cart Button -->
         <div class="position-fixed bottom-0 end-0 m-4" style="z-index: 1000;">
             <button class="btn btn-primary rounded-circle p-3 d-flex justify-content-center align-items-center" data-bs-toggle="offcanvas" data-bs-target="#cartSidebar"
                     style="width: 60px; height: 60px; position: relative;">
@@ -229,12 +212,9 @@
     <?php endif; ?>
 
     <?php if ($can_order): ?>
-        <!-- Only load cart JavaScript for logged-in users -->
         <script>
             let cart = JSON.parse(localStorage.getItem('savoriaCart')) || [];
             let currentModalItem = null;
-
-            // Update cart display
             function updateCartDisplay() {
                 const cartItems = document.getElementById('cartItems');
                 const cartTotal = document.getElementById('cartTotal');
@@ -315,8 +295,6 @@
                     input.value = parseInt(input.value) - 1;
                 }
             }
-
-            // Add to cart
             function addToCart(event, itemId, itemName, itemPrice) {
                 const quantity = parseInt(document.getElementById(`quantity-${itemId}`).value);
                 const existingItem = cart.find(item => item.id === itemId);
@@ -333,8 +311,6 @@
                 }
 
                 updateCartDisplay();
-
-                // Show success message
                 const btn = event.target;
                 const originalText = btn.textContent;
                 btn.textContent = 'Added!';
@@ -365,14 +341,11 @@
                     }
 
                     updateCartDisplay();
-
-                    // Close modal and show success
                     const modal = bootstrap.Modal.getInstance(document.getElementById('itemDetailsModal'));
                     modal.hide();
                 }
             }
 
-            // Cart management
             function removeFromCart(index) {
                 cart.splice(index, 1);
                 updateCartDisplay();
@@ -386,8 +359,6 @@
                     updateCartDisplay();
                 }
             }
-
-            // View details
             function viewDetails(itemId, itemName, itemDescription, itemPrice, itemImage) {
                 currentModalItem = { id: itemId, name: itemName, price: itemPrice };
 
@@ -408,12 +379,8 @@
                 const modal = new bootstrap.Modal(document.getElementById('itemDetailsModal'));
                 modal.show();
             }
-
-            // Checkout
             function proceedToCheckout() {
                 if (cart.length === 0) return;
-
-                // Show checkout form modal
                 showCheckoutModal();
             }
 
@@ -482,20 +449,12 @@
                         </div>
                     </div>
                 `;
-
-                // Remove existing modal if any
                 const existingModal = document.getElementById('checkoutModal');
                 if (existingModal) {
                     existingModal.remove();
                 }
-
-                // Add modal to body
                 document.body.insertAdjacentHTML('beforeend', modalHtml);
-
-                // Populate order summary
                 updateCheckoutSummary();
-
-                // Show modal
                 const modal = new bootstrap.Modal(document.getElementById('checkoutModal'));
                 modal.show();
             }
@@ -544,19 +503,11 @@
                     form.reportValidity();
                     return;
                 }
-
-                // Disable submit button
                 submitBtn.disabled = true;
                 submitBtn.textContent = 'Processing...';
 
                 try {
-                    console.log('[v0] Starting checkout process...');
-
-                    // Get CSRF token
-                    console.log('[v0] Fetching CSRF token...');
                     const csrfResponse = await fetch('includes/csrf.php?action=get_token');
-                    console.log('[v0] CSRF response status:', csrfResponse.status);
-
                     if (!csrfResponse.ok) {
                         throw new Error('Failed to get CSRF token');
                     }
@@ -575,8 +526,6 @@
                         csrf_token: csrfData.token
                     };
 
-                    console.log('[v0] Sending order data:', orderData);
-
                     const response = await fetch('process_checkout.php', {
                         method: 'POST',
                         headers: {
@@ -584,13 +533,7 @@
                         },
                         body: JSON.stringify(orderData)
                     });
-
-                    console.log('[v0] Checkout response status:', response.status);
-                    console.log('[v0] Checkout response headers:', response.headers);
-
                     const responseText = await response.text();
-                    console.log('[v0] Raw response:', responseText);
-
                     let result;
                     try {
                         result = JSON.parse(responseText);
@@ -598,20 +541,12 @@
                         console.error('[v0] JSON parse error:', parseError);
                         throw new Error('Invalid response format: ' + responseText);
                     }
-
-                    console.log('[v0] Parsed result:', result);
-
                     if (result.success) {
-                        // Clear cart
                         cart = [];
                         localStorage.removeItem('savoriaCart');
                         updateCartDisplay();
-
-                        // Close modal
                         const modal = bootstrap.Modal.getInstance(document.getElementById('checkoutModal'));
                         modal.hide();
-
-                        // Show success message
                         alert(`Order placed successfully! Order ID: ${result.order_id}\nTotal: $${result.total_amount.toFixed(2)}`);
                     } else {
                         alert('Error: ' + result.message);
@@ -620,27 +555,19 @@
                     console.error('[v0] Checkout error:', error);
                     alert('An error occurred while processing your order. Please try again.\nError: ' + error.message);
                 } finally {
-                    // Re-enable submit button
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Place Order';
                 }
             }
-
-            // Existing functions
        function showCategoryWithBg(button, categoryName) {
-    // Smooth active-bg
     const bg = document.querySelector(".active-bg");
     const container = button.parentElement;
     const rect = button.getBoundingClientRect();
     const containerRect = container.getBoundingClientRect();
     bg.style.left = (rect.left - containerRect.left) + "px";
     bg.style.width = rect.width + "px";
-
-    // Set active class
     document.querySelectorAll(".btn-menu").forEach((btn) => btn.classList.remove("btn-menu-active"));
     button.classList.add("btn-menu-active");
-
-    // Show menu categories
     if (categoryName === 'all') {
         document.querySelectorAll('.menu-category').forEach(category => category.style.display = 'block');
     } else {
@@ -650,7 +577,7 @@
     }
 }
 document.addEventListener('DOMContentLoaded', function() {
-    updateCartDisplay(); // existing function
+    updateCartDisplay();
     const activeBtn = document.querySelector('.btn-menu-active');
     if (activeBtn) {
         const bg = document.querySelector(".active-bg");
@@ -661,22 +588,16 @@ document.addEventListener('DOMContentLoaded', function() {
         bg.style.width = rect.width + "px";
     }
 });
-
-            // Initialize cart display on page load
             document.addEventListener('DOMContentLoaded', function() {
                 updateCartDisplay();
             });
         </script>
     <?php else: ?>
-        <!-- Simplified script for guest users -->
         <script>
-            // Existing functions for category filtering
             function showAllCategories() {
                 document.querySelectorAll('.menu-category').forEach(category => {
                     category.style.display = 'block';
                 });
-
-                // Update active button
                 document.querySelectorAll('.btn-menu').forEach(btn => {
                     btn.classList.remove('btn-menu-active');
                 });
@@ -691,8 +612,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         category.style.display = 'none';
                     }
                 });
-
-                // Update active button
                 document.querySelectorAll('.btn-menu').forEach(btn => {
                     btn.classList.remove('btn-menu-active');
                 });

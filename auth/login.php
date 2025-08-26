@@ -6,10 +6,8 @@ require_once __DIR__ . '/../includes/validation.php';
 require_once __DIR__ . '/../includes/security.php';
 require_once __DIR__ . '/../includes/db.php';
 
-// Set security headers
 set_security_headers();
 
-// Redirect if already logged in
 if (is_logged_in()) {
     header('Location: ' . BASE_URL . '/index.php');
     exit;
@@ -31,15 +29,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $db = db();
     $rate_limiter = new RateLimiter($db);
     $client_ip = get_client_ip();
-    
-    // Check rate limiting
+
     if ($rate_limiter->isLimited($client_ip, 'login', 5, 15)) {
         $remaining_attempts = $rate_limiter->getRemainingAttempts($client_ip, 'login', 5, 15);
         log_security_event('login_rate_limited', ['ip' => $client_ip, 'email' => $email]);
         $errors['general'] = 'Too many failed login attempts. Please try again in 15 minutes.';
     }
-    
-    // Validation
+
     if (empty($email)) {
         $errors['email'] = 'Email is required.';
     } elseif (!is_valid_email($email)) {
@@ -54,18 +50,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = get_user_by_email($email);
         
         if ($user && $user['is_active'] && verify_user_password($user, $password)) {
-            // Successful login
             log_security_event('login_success', ['user_id' => $user['id'], 'email' => $email], $user['id']);
             login_user($user['id']);
-            
-            // Redirect to intended page or dashboard
             $redirect = $_SESSION['redirect_after_login'] ?? (has_role('admin') ? '/admin/index.php' : '/index.php');
             unset($_SESSION['redirect_after_login']);
             
             header('Location: ' . BASE_URL . $redirect);
             exit;
         } else {
-            // Failed login
             $rate_limiter->recordAttempt($client_ip, 'login');
             log_security_event('login_failed', ['ip' => $client_ip, 'email' => $email]);
             $errors['general'] = 'Invalid email or password.';
@@ -117,7 +109,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <?php endif; ?>
 
                 <form method="POST" class="d-flex flex-column gap-4">
-                    <?php // Fixed function name from csrf_token_field() to csrf_field() ?>
                     <?= csrf_field() ?>
                     
                     <div class="d-flex flex-column">

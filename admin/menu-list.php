@@ -3,18 +3,16 @@
 
     require_once __DIR__ . '/../includes/auth.php';
     require_once __DIR__ . '/../includes/flash.php';
-    require_once __DIR__ . '/../includes/validation.php'; // contains sanitize_input()
-    require_once __DIR__ . '/../includes/security.php';   // security headers, rate limiting, logging
-    require_once __DIR__ . '/../includes/csrf.php';       // csrf_field()
+    require_once __DIR__ . '/../includes/validation.php';
+    require_once __DIR__ . '/../includes/security.php';
+    require_once __DIR__ . '/../includes/csrf.php';
 
-    // Require admin role
     require_role('admin');
 
     $page_title    = 'Menu Items';
     $page_subtitle = 'Manage your restaurant menu';
     $current_page  = 'menu';
 
-    // Pagination & Filters
     $page            = max(1, (int) ($_GET['page'] ?? 1));
     $search          = sanitize_input($_GET['search'] ?? '');
     $category_filter = (int) ($_GET['category'] ?? 0);
@@ -22,7 +20,6 @@
     $limit           = ITEMS_PER_PAGE;
     $offset          = ($page - 1) * $limit;
 
-    // Build WHERE clause
     $where_conditions = [];
     $params           = [];
     $types            = '';
@@ -49,12 +46,10 @@
 
     $where_clause = $where_conditions ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
 
-    // Totals
     $count_sql   = "SELECT COUNT(*) as total FROM menu_items m $where_clause";
     $total_items = db_fetch_one($count_sql, $params, $types)['total'];
     $total_pages = max(1, (int) ceil($total_items / $limit));
 
-    // Fetch menu items
     $sql = "SELECT m.*, c.name as category_name
         FROM menu_items m
         LEFT JOIN categories c ON m.category_id = c.id
@@ -67,7 +62,6 @@
 
     $menu_items = db_fetch_all($sql, $params, $types);
 
-    // Filters
     $categories = db_fetch_all("SELECT * FROM categories WHERE is_active = 1 ORDER BY display_order ASC");
 
     include 'shared/header.php';
@@ -84,7 +78,6 @@
         </a>
     </div>
 
-    <!-- Flash Messages -->
     <?php flash_show('success'); ?>
 <?php flash_show('error'); ?>
 
@@ -116,7 +109,6 @@
         </div>
     </form>
 
-    <!-- Menu Items Table -->
     <?php if (empty($menu_items)): ?>
         <div class="text-center py-5">
             <p class="text-muted">No menu items found.</p>
@@ -209,7 +201,6 @@
 <?php endif; ?>
 </div>
 
-<!-- Delete Confirmation Modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -233,8 +224,7 @@
   </div>
 </div>
 
-<?php
-    $extra_js = <<<JS
+
 <script>
 function confirmDelete(id, name) {
   document.getElementById('deleteItemId').value = id;
@@ -243,6 +233,5 @@ function confirmDelete(id, name) {
   m.show();
 }
 </script>
-JS;
 
-include 'shared/footer.php';
+<?php include 'shared/footer.php'; ?>

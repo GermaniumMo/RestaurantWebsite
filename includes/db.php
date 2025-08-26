@@ -13,7 +13,6 @@ class Database {
                 throw new Exception("Connection failed: " . $this->connection->connect_error);
             }
             
-            // Set charset to UTF-8
             $this->connection->set_charset("utf8mb4");
             
         } catch (Exception $e) {
@@ -35,8 +34,7 @@ class Database {
     public function getConnection() {
         return $this->connection;
     }
-    
-    // Helper function for prepared statements
+
     public function query($sql, $params = [], $types = '') {
         $stmt = $this->connection->prepare($sql);
         
@@ -50,7 +48,6 @@ class Database {
         
         if (!empty($params)) {
             if (empty($types)) {
-                // Auto-detect types
                 $types = str_repeat('s', count($params));
                 foreach ($params as $param) {
                     if (is_int($param)) {
@@ -73,55 +70,45 @@ class Database {
         
         return $stmt;
     }
-    
-    // Get single row
+
     public function fetchOne($sql, $params = [], $types = '') {
         $stmt = $this->query($sql, $params, $types);
         $result = $stmt->get_result();
         return $result->fetch_assoc();
     }
-    
-    // Get multiple rows
+
     public function fetchAll($sql, $params = [], $types = '') {
         $stmt = $this->query($sql, $params, $types);
         $result = $stmt->get_result();
         return $result->fetch_all(MYSQLI_ASSOC);
     }
-    
-    // Insert and return last insert ID
+
     public function insert($sql, $params = [], $types = '') {
         $stmt = $this->query($sql, $params, $types);
         return $this->connection->insert_id;
     }
-    
-    // Update/Delete and return affected rows
     public function execute($sql, $params = [], $types = '') {
         $stmt = $this->query($sql, $params, $types);
         return $stmt->affected_rows;
     }
-    
-    // Begin transaction
+
     public function beginTransaction() {
         return $this->connection->begin_transaction();
     }
     
-    // Commit transaction
     public function commit() {
         return $this->connection->commit();
     }
-    
-    // Rollback transaction
+
     public function rollback() {
         return $this->connection->rollback();
     }
-    
-    // Escape string
+
     public function escape($string) {
         return $this->connection->real_escape_string($string);
     }
 }
 
-// Global helper functions
 function db() {
     return Database::getInstance();
 }

@@ -6,13 +6,11 @@
     require_once __DIR__ . '/../includes/csrf.php';
     require_once __DIR__ . '/../includes/validation.php';
 
-    // Check admin
     if (! is_logged_in() || ! has_role('admin')) {
         header('Location: ../auth/login.php');
         exit;
     }
 
-    // Get category ID
     $category_id = (int) ($_GET['id'] ?? 0);
     if (! $category_id) {
         flash('error', 'Invalid category ID.');
@@ -20,7 +18,6 @@
         exit;
     }
 
-    // Fetch category
     $category = db_fetch_one("SELECT * FROM categories WHERE id = ?", [$category_id], 'i');
     if (! $category) {
         flash('error', 'Category not found.');
@@ -28,7 +25,6 @@
         exit;
     }
 
-    // Initialize form values
     $form_name        = $category['name'];
     $form_description = $category['description'] ?? '';
     $form_display     = (int) $category['display_order'];
@@ -41,20 +37,16 @@
             exit;
         }
 
-        // POST values
         $form_name        = trim($_POST['name'] ?? $form_name);
         $form_description = trim($_POST['description'] ?? $form_description);
         $form_display     = (int) ($_POST['display_order'] ?? $form_display);
         $form_is_active   = isset($_POST['is_active']) ? 1 : 0;
 
         $errors = [];
-
-        // Validation
         if (empty($form_name)) {
             $errors[] = 'Name is required.';
         }
 
-        // Check for duplicate name (ignore current category)
         $existing = db_fetch_one(
             "SELECT id FROM categories WHERE name = ? AND id != ? LIMIT 1",
             [$form_name, $category_id],
@@ -65,7 +57,7 @@
         }
 
         if (empty($errors)) {
-            // Update category
+
             $sql = "UPDATE categories
                    SET name = ?, description = ?, display_order = ?, is_active = ?, updated_at = NOW()
                    WHERE id = ?";

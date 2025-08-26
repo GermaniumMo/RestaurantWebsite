@@ -1,4 +1,4 @@
-<!-- RESERVATION SECTION -->
+
 <section class="d-flex w-100 contactFooter-container justify-content-center align-items-center">
   <div class="w-100 d-flex flex-column contactFooter-innContainer justify-content-center align-items-center">
     <div class="d-flex flex-column w-75">
@@ -8,13 +8,10 @@
           Book your table for an unforgettable dining experience
         </p>
       </div>
-
-      <!-- FORM -->
    <?php if (is_logged_in()): ?>
               <form id="reservationForm" method="POST" action="process_reservation.php">
                 <?php echo csrf_field() ?>
         <div class="row g-3 justify-content-center">
-          <!-- Left Column -->
           <div class="col-md-6 d-flex flex-column gap-3">
             <input id="name" type="text" name="name" placeholder="Full Name"
               class="form-control input-form " required />
@@ -24,7 +21,6 @@
               class="form-control input-form" required />
           </div>
 
-          <!-- Right Column -->
           <div class="col-md-6 d-flex flex-column gap-3">
             <input type="date" class="form-control input-form" id="date" name="date" required>
            <select class="form-control input-form" id="time" name="time" required>
@@ -54,7 +50,6 @@
           </div>
         </div>
 
-        <!-- Centered Button -->
         <div class="d-flex justify-content-center mt-4">
           <button class="btn reservation-btn" style="width: 30%;" type="submit" id="reserveBtn">
             Reserve Now
@@ -76,21 +71,15 @@
   </div>
 </section>
 
-
-
-<!-- FOOTER SECTION -->
 <section class="d-flex w-100 contactFooter-container justify-content-center align-items-center">
   <div class="w-100 d-flex flex-column contactFooter-innContainer justify-content-center align-items-center" style="padding: 2.5rem 10rem 0 10rem !important;">
     <div class="d-flex w-100 justify-content-center restaurant-info" style="margin-top: 0;">
-      <!-- About -->
       <div class="d-flex flex-column gap-3" style="width: 288px">
         <h1 class="title-info">Savoria</h1>
         <p class="description-info">
           Experience the art of fine dining in an elegant atmosphere.
         </p>
       </div>
-
-      <!-- Contact -->
       <div class="col-3 col-md-3 mb-3">
         <h5 class="contact-title">Contact</h5>
         <ul class="nav flex-column">
@@ -126,8 +115,6 @@
                   </svg>info@savoria.com</li>
         </ul>
       </div>
-
-      <!-- Hours -->
       <div class="col-3 col-md-3 mb-3">
         <h5 class="contact-title">Hours</h5>
         <ul class="nav flex-column">
@@ -136,8 +123,6 @@
           <li class="nav-item mb-2">Sun: 4:00 PM - 9:00 PM</li>
         </ul>
       </div>
-
-      <!-- Follow Us -->
       <div class="d-flex flex-column">
         <h5 class="contact-title">Follow Us</h5>
         <ul class="list-unstyled d-flex">
@@ -165,7 +150,6 @@
       </div>
     </div>
 
-    <!-- Copyright -->
     <div class="d-flex flex-column flex-sm-row justify-content-between pt-3 border-top w-100 justify-content-center align-items-center">
       <p class="text-center w-100 footer-copyright">
         &copy; 2024 Savoria. All rights reserved.

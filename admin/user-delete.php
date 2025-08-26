@@ -5,13 +5,11 @@ require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/flash.php';
 
-// Check if user is admin
 if (! is_logged_in() || ! has_role('admin')) {
     header('Location: ../auth/login.php');
     exit;
 }
 
-// Only POST requests allowed
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: user-list.php');
     exit;
@@ -26,7 +24,6 @@ if (! $user_id) {
     exit;
 }
 
-// Prevent self-deletion
 if ($user_id === $current_user_id) {
     flash('error', 'You cannot delete your own account.');
     header('Location: user-list.php');
@@ -34,7 +31,6 @@ if ($user_id === $current_user_id) {
 }
 
 try {
-    // Check if user exists
     $user = db_fetch_one("SELECT name FROM users WHERE id = ?", [$user_id]);
     if (! $user) {
         flash('error', 'User not found.');
@@ -42,7 +38,6 @@ try {
         exit;
     }
 
-    // Delete user
     db_execute("DELETE FROM users WHERE id = ?", [$user_id]);
 
     flash('success', 'User "' . htmlspecialchars($user['name']) . '" has been deleted successfully.');

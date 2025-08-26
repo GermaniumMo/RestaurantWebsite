@@ -1,16 +1,13 @@
 <?php
-// Start session if not already started
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Set flash message
 function flash($type, $message)
 {
     $_SESSION['flash'][$type] = $message;
 }
 
-// Get and remove flash message
 function flash_get($type)
 {
     if (isset($_SESSION['flash'][$type])) {
@@ -21,7 +18,6 @@ function flash_get($type)
     return null;
 }
 
-// Display flash message as Bootstrap alert
 function flash_show($type)
 {
     $message = flash_get($type);
@@ -51,13 +47,11 @@ function flash_show($type)
     }
 }
 
-// Check if flash message exists
 function has_flash($type)
 {
     return isset($_SESSION['flash'][$type]);
 }
 
-// Display all flash messages
 function flash_show_all()
 {
     if (isset($_SESSION['flash'])) {
@@ -67,7 +61,6 @@ function flash_show_all()
     }
 }
 
-// Clear all flash messages
 function flash_clear()
 {
     unset($_SESSION['flash']);

@@ -3,16 +3,14 @@
     require_once __DIR__ . '/../config.php';
     require_once __DIR__ . '/../includes/auth.php';
     require_once __DIR__ . '/../includes/flash.php';
-    require_once __DIR__ . '/../includes/security.php'; // sanitize_input
+    require_once __DIR__ . '/../includes/security.php';
 
-    // Require admin role
     require_role('admin');
 
     $page_title    = 'Reservations';
     $page_subtitle = 'Manage restaurant reservations';
     $current_page  = 'reservations';
 
-    // Pagination and filters
     $page          = max(1, (int) ($_GET['page'] ?? 1));
     $search        = sanitize_input($_GET['search'] ?? '');
     $status_filter = $_GET['status'] ?? '';
@@ -20,7 +18,6 @@
     $limit         = ITEMS_PER_PAGE;
     $offset        = ($page - 1) * $limit;
 
-    // Build query conditions
     $where_conditions = [];
     $params           = [];
     $types            = '';
@@ -48,7 +45,6 @@
 
     $where_clause = ! empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
 
-    // Get total count
     $count_sql   = "SELECT COUNT(*) as total FROM reservations r $where_clause";
     $total_items = db_fetch_one($count_sql, $params, $types)['total'];
     $total_pages = ceil($total_items / $limit);
@@ -67,7 +63,6 @@ LIMIT ? OFFSET ?";
 
     $reservations = db_fetch_all($sql, $params, $types);
 
-    // Get status counts
     $status_counts = [
         'pending'   => db_fetch_one("SELECT COUNT(*) as count FROM reservations WHERE status = 'pending'")['count'],
         'confirmed' => db_fetch_one("SELECT COUNT(*) as count FROM reservations WHERE status = 'confirmed'")['count'],
@@ -96,7 +91,6 @@ LIMIT ? OFFSET ?";
         </div>
     </div>
 
-    <!-- Quick Status Filters -->
     <div class="row mb-3">
         <div class="col-12">
             <div class="btn-group btn-group-sm" role="group">
@@ -109,7 +103,6 @@ LIMIT ? OFFSET ?";
         </div>
     </div>
 
-    <!-- Filters -->
     <form method="GET" class="row g-3 mb-4">
         <div class="col-md-4">
             <input type="text" name="search" class="form-control" placeholder="Search by name, email, or phone..."
@@ -131,8 +124,6 @@ LIMIT ? OFFSET ?";
             <button type="submit" class="btn btn-outline-primary w-100">Filter</button>
         </div>
     </form>
-
-    <!-- Reservations Table -->
     <?php if (empty($reservations)): ?>
         <div class="text-center py-5">
             <p class="text-muted">No reservations found.</p>
@@ -217,7 +208,6 @@ LIMIT ? OFFSET ?";
             </table>
         </div>
 
-        <!-- Pagination -->
         <?php if ($total_pages > 1): ?>
             <nav aria-label="Reservations pagination">
                 <ul class="pagination justify-content-center">
@@ -244,7 +234,6 @@ LIMIT ? OFFSET ?";
 <?php endif; ?>
 </div>
 
-<!-- Delete Modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -264,7 +253,6 @@ LIMIT ? OFFSET ?";
     </div>
 </div>
 
-<!-- Status Modal -->
 <div class="modal fade" id="statusModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -309,7 +297,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const btn = e.target.closest("[data-delete='true'], [data-update-status='true']");
         if (!btn) return;
 
-        // Delete
         if (btn.dataset.delete === "true") {
             deleteId = btn.dataset.id;
             document.getElementById("deleteReservationName").textContent = btn.dataset.name;
@@ -317,7 +304,6 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // Status update
         if (btn.dataset.updateStatus === "true") {
             const id = btn.dataset.id;
             const status = btn.dataset.status;
@@ -385,7 +371,6 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(res => res.json())
         .then(data => {
             if (data.success) {
-                // Reload page to reflect changes
                 location.reload();
             } else {
                 alert(data.message);
@@ -405,7 +390,6 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(res => res.json())
         .then(data => {
             if (data.success) {
-                // Reload page to reflect changes
                 location.reload();
             } else {
                 alert(data.message);

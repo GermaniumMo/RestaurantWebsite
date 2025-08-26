@@ -1,6 +1,4 @@
 <?php
-// Validation helper functions
-
 if (! function_exists('sanitize_input')) {
     function sanitize_input($data)
     {
@@ -119,8 +117,6 @@ function sanitize_array($array)
     }
     return $sanitized;
 }
-
-// Validate multiple fields at once
 function validate_fields($data, $rules)
 {
     $errors = [];
@@ -159,7 +155,7 @@ function validate_fields($data, $rules)
 
             if ($error) {
                 $errors[$field] = $error;
-                break; // Stop at first error for this field
+                break;
             }
         }
     }

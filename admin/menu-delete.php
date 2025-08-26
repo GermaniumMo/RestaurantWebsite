@@ -2,13 +2,13 @@
 declare(strict_types=1);
 
 error_reporting(E_ALL);
-ini_set('display_errors', '0');    // keep errors out of the UI
-ini_set('log_errors', '1');        // ensure they hit error_log
+ini_set('display_errors', '0');
+ini_set('log_errors', '1');
 
 require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/csrf.php';
 require_once __DIR__ . '/../includes/flash.php';
-require_once __DIR__ . '/../includes/db.php'; // ✅ make sure DB helpers exist
+require_once __DIR__ . '/../includes/db.php';
 
 require_role('admin');
 
@@ -67,13 +67,11 @@ try {
     if ($affected > 0) {
         respond(true, 'Menu item "' . $item['name'] . '" has been deleted successfully.');
     } else {
-        // MySQL might return 0 if row existed but cannot be deleted due to FK, or already gone
         error_log('[menu-delete] No rows affected; possible constraints or already deleted.');
         respond(false, 'Failed to delete menu item. It might be in use by other data.');
     }
 } catch (Throwable $e) {
     error_log('[menu-delete] Exception during delete: ' . $e->getMessage());
-    // If you have a helper like db_last_error(), log it:
     if (function_exists('db_last_error')) {
         error_log('[menu-delete] db_last_error: ' . db_last_error());
     }

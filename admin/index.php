@@ -1,11 +1,8 @@
 <?php
 require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/flash.php';
-
-// Require admin role
 require_role('admin');
 
-// Get dashboard statistics
 try {
     $stats = [
         'total_users' => db_fetch_one("SELECT COUNT(*) as count FROM users")['count'],
@@ -15,15 +12,13 @@ try {
         'todays_reservations' => db_fetch_one("SELECT COUNT(*) as count FROM reservations WHERE reservation_date = CURDATE()")['count'],
         'featured_items' => db_fetch_one("SELECT COUNT(*) as count FROM menu_items WHERE is_featured = 1")['count']
     ];
-    
-    // Get recent reservations
+
     $recent_reservations = db_fetch_all(
         "SELECT r.*, u.name as user_name FROM reservations r 
          LEFT JOIN users u ON r.user_id = u.id 
          ORDER BY r.created_at DESC LIMIT 5"
     );
-    
-    // Get recent users
+
     $recent_users = db_fetch_all(
         "SELECT id, name, email, role, created_at FROM users 
          ORDER BY created_at DESC LIMIT 5"
@@ -119,7 +114,6 @@ $user = current_user();
 <body>
     <div class="container-fluid p-0">
         <div class="row g-0">
-            <!-- Sidebar -->
             <div class="col-md-3 col-lg-2 admin-sidebar">
                 <div class="px-3">
                     <h2 class="text-white mb-4" style="font-family: 'Cormorant Garamond', serif;">
@@ -156,9 +150,7 @@ $user = current_user();
                 </div>
             </div>
 
-            <!-- Main Content -->
             <div class="col-md-9 col-lg-10 admin-content">
-                <!-- Header -->
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <div>
                         <h1 style="font-family: 'Cormorant Garamond', serif; color: #111827;">Dashboard</h1>
@@ -169,10 +161,8 @@ $user = current_user();
                     </div>
                 </div>
 
-                <!-- Flash Messages -->
                 <?php flash_show_all(); ?>
 
-                <!-- Statistics Cards -->
                 <div class="row mb-4">
                     <div class="col-md-6 col-lg-4 mb-3">
                         <div class="stat-card">
@@ -212,7 +202,6 @@ $user = current_user();
                     </div>
                 </div>
 
-                <!-- Quick Actions -->
                 <div class="row mb-4">
                     <div class="col-12">
                         <div class="recent-activity">
@@ -243,7 +232,6 @@ $user = current_user();
                     </div>
                 </div>
 
-                <!-- Recent Activity -->
                 <div class="row">
                     <div class="col-md-6">
                         <div class="recent-activity">

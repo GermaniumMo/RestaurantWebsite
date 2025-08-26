@@ -6,13 +6,11 @@
     require_once __DIR__ . '/../includes/csrf.php';
     require_once __DIR__ . '/../includes/validation.php';
 
-    // Check admin
     if (! is_logged_in() || ! has_role('admin')) {
         header('Location: ../auth/login.php');
         exit;
     }
 
-    // Get user ID
     $user_id = intval($_GET['id'] ?? 0);
     if (! $user_id) {
         flash('error', 'Invalid user ID.');
@@ -20,7 +18,6 @@
         exit;
     }
 
-    // Fetch the user being edited
     $user = db_fetch_one("SELECT * FROM users WHERE id = ?", [$user_id], "i");
     if (! $user) {
         flash('error', 'User not found.');
@@ -28,7 +25,6 @@
         exit;
     }
 
-    // Initialize form values
     $form_name      = $user['name'];
     $form_email     = $user['email'];
     $form_role      = $user['role'];
@@ -41,7 +37,6 @@
             exit;
         }
 
-        // POST values
         $form_name      = trim($_POST['name'] ?? $form_name);
         $form_email     = trim($_POST['email'] ?? $form_email);
         $form_role      = $_POST['role'] ?? $form_role;
@@ -50,7 +45,6 @@
 
         $errors = [];
 
-        // Validation
         if (empty($form_name)) {
             $errors[] = 'Name is required.';
         }
@@ -63,7 +57,6 @@
             $errors[] = 'Invalid role selected.';
         }
 
-        // Email duplicate check (exclude same user’s ID)
         if (strtolower($form_email) !== strtolower($user['email'])) {
             $existing = db_fetch_one(
                 "SELECT id FROM users WHERE email = ? AND id != ? LIMIT 1",

@@ -6,7 +6,7 @@ require_once __DIR__ . '/includes/security.php';
 require_once __DIR__ . '/includes/enhanced_validation.php';
 require_once __DIR__ . '/includes/db.php';
 
-header('Content-Type: application/json'); // Always return JSON
+header('Content-Type: application/json');
 
 if (! is_logged_in()) {
     echo json_encode(['success' => false, 'message' => 'You must be logged in to make a reservation.']);
@@ -33,8 +33,6 @@ if ($rate_limiter->isLimited($client_ip, 'reservation', 3, 10)) {
     echo json_encode(['success' => false, 'message' => 'Too many reservation attempts. Please try again later.']);
     exit;
 }
-
-// Collect and sanitize input
 $data = [
     'name'             => sanitize_input($_POST['name'] ?? ''),
     'email'            => sanitize_input($_POST['email'] ?? ''),
@@ -45,7 +43,6 @@ $data = [
     'special_requests' => sanitize_input($_POST['special_requests'] ?? ''),
 ];
 
-// Validate
 $validator = validate_reservation_data($data);
 if ($validator->fails()) {
     $rate_limiter->recordAttempt($client_ip, 'reservation');

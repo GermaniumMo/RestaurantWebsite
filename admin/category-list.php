@@ -5,7 +5,6 @@
     require_once __DIR__ . '/../includes/flash.php';
     require_once __DIR__ . '/../includes/csrf.php';
 
-    // Check if user is admin
     if (! is_logged_in() || ! has_role('admin')) {
         header('Location: ../auth/login.php');
         exit;
@@ -13,15 +12,12 @@
 
     $page_title   = 'Category Management';
     $current_page = 'categories';
-
-    // Handle search and filtering
     $search        = $_GET['search'] ?? '';
     $status_filter = $_GET['status'] ?? '';
     $page          = max(1, intval($_GET['page'] ?? 1));
     $per_page      = 10;
     $offset        = ($page - 1) * $per_page;
 
-    // Build query
     $where_conditions = [];
     $params           = [];
 
@@ -57,7 +53,6 @@
                 <a href="category-create.php" class="btn btn-primary">Add New Category</a>
             </div>
 
-            <!-- Search and Filter -->
             <div class="card mb-4">
                 <div class="card-body">
                     <form method="GET" class="row g-3">
@@ -81,7 +76,6 @@
                 </div>
             </div>
 
-            <!-- Categories Table -->
             <div class="card">
                 <div class="card-body">
                     <?php if (empty($categories)): ?>
@@ -161,7 +155,6 @@
     </div>
 </div>
 
-<!-- Delete Confirmation Modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">

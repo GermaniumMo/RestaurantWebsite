@@ -4,7 +4,6 @@ require_once __DIR__ . '/includes/csrf.php';
 require_once __DIR__ . '/includes/flash.php';
 require_once __DIR__ . '/includes/db.php';
 
-// Require user to be logged in
 require_login();
 
 function wants_json(): bool {
@@ -50,7 +49,6 @@ if (!$reservation_id) {
     exit;
 }
 
-// Get reservation and verify ownership
 $reservation = db_fetch_one(
     "SELECT * FROM reservations WHERE id = ? AND (user_id = ? OR email = ?)",
     [$reservation_id, $user['id'], $user['email']],
@@ -68,7 +66,6 @@ if (!$reservation) {
     exit;
 }
 
-// Check if reservation can be cancelled (must be pending and in the future)
 if ($reservation['status'] !== 'pending') {
     if (wants_json()) {
         header('Content-Type: application/json');
@@ -80,7 +77,6 @@ if ($reservation['status'] !== 'pending') {
     exit;
 }
 
-// Use combined date+time for a correct "future" check
 $when = strtotime($reservation['reservation_date'].' '.$reservation['reservation_time']);
 if ($when !== false && $when <= time()) {
     if (wants_json()) {

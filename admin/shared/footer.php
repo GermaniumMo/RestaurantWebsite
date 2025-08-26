@@ -1,5 +1,4 @@
 <?php
-    // Shared footer for admin pages
     if (! defined('ADMIN_PAGE')) {
         die('Direct access not allowed');
     }

@@ -5,20 +5,17 @@
     require_once __DIR__ . '/../includes/db.php';
     require_once __DIR__ . '/../includes/flash.php';
 
-    // Check admin
     if (! is_logged_in() || ! has_role('admin')) {
         header('Location: ../auth/login.php');
         exit;
     }
 
-    // Handle search and filtering
     $search      = $_GET['search'] ?? '';
     $role_filter = $_GET['role'] ?? '';
     $page        = max(1, intval($_GET['page'] ?? 1));
     $per_page    = 10;
     $offset      = ($page - 1) * $per_page;
 
-    // Build WHERE clause
     $where_conditions = [];
     $params           = [];
 
@@ -35,13 +32,11 @@
 
     $where_clause = ! empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
 
-    // Get total count
     $count_sql       = "SELECT COUNT(*) AS cnt FROM users $where_clause";
     $total_users_row = db_fetch_one($count_sql, $params);
     $total_users     = $total_users_row['cnt'] ?? 0;
     $total_pages     = ceil($total_users / $per_page);
 
-    // Get users
     $sql               = "SELECT * FROM users $where_clause ORDER BY created_at DESC LIMIT ? OFFSET ?";
     $params_with_limit = array_merge($params, [$per_page, $offset]);
     $users             = db_fetch_all($sql, $params_with_limit);
@@ -59,10 +54,8 @@
                 </button>
             </div>
 
-            <!-- Flash messages -->
             <?php flash_show_all(); ?>
 
-            <!-- Search and Filter -->
             <div class="card mb-4">
                 <div class="card-body">
                     <form method="GET" class="row g-3">
@@ -86,7 +79,6 @@
                 </div>
             </div>
 
-            <!-- Users Table -->
             <div class="card">
                 <div class="card-body">
                     <?php if (empty($users)): ?>
@@ -138,7 +130,6 @@
                             </table>
                         </div>
 
-                        <!-- Pagination -->
                         <?php if ($total_pages > 1): ?>
                             <nav aria-label="Users pagination">
                                 <ul class="pagination justify-content-center">
@@ -169,7 +160,6 @@
     </div>
 </div>
 
-<!-- Delete Confirmation Modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -192,7 +182,6 @@
     </div>
 </div>
 
-<!-- Create User Modal -->
 <div class="modal fade" id="createUserModal" tabindex="-1" aria-labelledby="createUserModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">

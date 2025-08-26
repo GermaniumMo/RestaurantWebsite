@@ -3,10 +3,8 @@ require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/csrf.php';
 require_once __DIR__ . '/../includes/flash.php';
 
-// Require admin role
 require_role('admin');
 
-// Only allow POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => 'Invalid request method.']);
@@ -22,7 +20,6 @@ if (! $reservation_id) {
     exit;
 }
 
-// Get reservation to verify it exists
 $reservation = db_fetch_one("SELECT name FROM reservations WHERE id = ?", [$reservation_id], 'i');
 
 if (! $reservation) {

@@ -5,7 +5,6 @@ require_once __DIR__ . '/../includes/csrf.php';
 require_once __DIR__ . '/../includes/flash.php';
 require_once __DIR__ . '/../includes/validation.php';
 
-// Require admin role
 require_role('admin');
 
 $page_title = 'Add Menu Item';
@@ -24,7 +23,6 @@ $form_data = [
     'display_order' => 0
 ];
 
-// Get categories
 $categories = db_fetch_all("SELECT * FROM categories WHERE is_active = 1 ORDER BY display_order ASC");
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -41,7 +39,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'display_order' => (int)($_POST['display_order'] ?? 0)
     ];
     
-    // Validation
     if (empty($form_data['name'])) {
         $errors['name'] = 'Menu item name is required.';
     } elseif (strlen($form_data['name']) > 150) {
@@ -82,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $form_data['is_featured'],
         $form_data['display_order']
     ],
-    'issdsiii' // <-- Changed from 'issdsiiii' to 'issdsiii' (8 types)
+    'issdsiii'
 );
 
             

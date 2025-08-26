@@ -1,11 +1,6 @@
--- Create and setup Savoria Restaurant Database
--- Run this script to initialize the database
-
--- Create database
 CREATE DATABASE IF NOT EXISTS savoria_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE savoria_db;
 
--- Users table
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -20,7 +15,6 @@ CREATE TABLE IF NOT EXISTS users (
     INDEX idx_role (role)
 );
 
--- Categories table for menu organization
 CREATE TABLE IF NOT EXISTS categories (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
@@ -32,7 +26,6 @@ CREATE TABLE IF NOT EXISTS categories (
     INDEX idx_active_order (is_active, display_order)
 );
 
--- Menu items table
 CREATE TABLE IF NOT EXISTS menu_items (
     id INT AUTO_INCREMENT PRIMARY KEY,
     category_id INT,
@@ -52,7 +45,6 @@ CREATE TABLE IF NOT EXISTS menu_items (
     INDEX idx_display_order (display_order)
 );
 
--- Reservations table
 CREATE TABLE IF NOT EXISTS reservations (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NULL,
@@ -73,7 +65,6 @@ CREATE TABLE IF NOT EXISTS reservations (
     INDEX idx_email (email)
 );
 
--- Orders table (for online ordering)
 CREATE TABLE IF NOT EXISTS orders (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NULL,
@@ -93,7 +84,6 @@ CREATE TABLE IF NOT EXISTS orders (
     INDEX idx_created_at (created_at)
 );
 
--- Order items table
 CREATE TABLE IF NOT EXISTS order_items (
     id INT AUTO_INCREMENT PRIMARY KEY,
     order_id INT NOT NULL,
@@ -108,18 +98,15 @@ CREATE TABLE IF NOT EXISTS order_items (
     INDEX idx_menu_item (menu_item_id)
 );
 
--- Insert default admin user (password: admin123)
 INSERT IGNORE INTO users (name, email, password_hash, role) VALUES 
 ('Admin User', 'admin@savoria.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin');
 
--- Insert default categories
 INSERT IGNORE INTO categories (name, description, display_order) VALUES 
 ('Appetizers', 'Start your meal with our delicious appetizers', 1),
 ('Main Courses', 'Our signature main dishes', 2),
 ('Desserts', 'Sweet endings to your perfect meal', 3),
 ('Beverages', 'Refreshing drinks and fine wines', 4);
 
--- Insert sample menu items
 INSERT IGNORE INTO menu_items (category_id, name, description, price, is_featured, display_order) VALUES 
 (2, 'Grilled Sea Bass', 'Fresh Mediterranean sea bass with herbs and lemon butter sauce', 42.00, TRUE, 1),
 (2, 'Prime Ribeye Steak', '28-day aged beef with roasted vegetables and red wine jus', 56.00, TRUE, 2),

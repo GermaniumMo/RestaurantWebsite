@@ -18,26 +18,19 @@ class DatabaseTestSuite {
     public function runAllTests() {
         echo "<h2>Starting Database Tests...</h2>\n";
         
-        // Core database connection tests
         $this->testDatabaseConnection();
         $this->testDatabaseFunctions();
         
-        // CRUD operation tests
         $this->testUserCRUD();
         $this->testCategoryCRUD();
         $this->testMenuItemCRUD();
         $this->testReservationCRUD();
         $this->testContactMessageCRUD();
         $this->testCartOperations();
-        
-        // Security and validation tests
         $this->testInputSanitization();
         $this->testSQLInjectionPrevention();
         $this->testTransactionHandling();
-        
-        // Performance tests
         $this->testQueryPerformance();
-        
         $this->displayResults();
     }
     
@@ -202,8 +195,7 @@ class DatabaseTestSuite {
     
     private function testReservationCRUD() {
         echo "<h3>Reservation CRUD Operations</h3>\n";
-        
-        // First create a test user
+
         $test_user_id = db_insert(
             "INSERT INTO users (name, email, password_hash, role, is_active, created_at) VALUES (?, ?, ?, ?, ?, NOW())",
             ['Reservation Test User', 'reservation_test@example.com', password_hash('testpass', PASSWORD_DEFAULT), 'customer', 1],
@@ -230,8 +222,7 @@ class DatabaseTestSuite {
             $affected = db_execute("DELETE FROM reservations WHERE id = ?", [$reservation_id]);
             return $affected > 0;
         });
-        
-        // Clean up test user
+
         db_execute("DELETE FROM users WHERE id = ?", [$test_user_id]);
     }
     
@@ -280,8 +271,7 @@ class DatabaseTestSuite {
     
     private function testCartOperations() {
         echo "<h3>Cart Operations</h3>\n";
-        
-        // Create test user and menu item
+
         $test_user_id = db_insert(
             "INSERT INTO users (name, email, password_hash, role, is_active, created_at) VALUES (?, ?, ?, ?, ?, NOW())",
             ['Cart Test User', 'cart_test@example.com', password_hash('testpass', PASSWORD_DEFAULT), 'customer', 1],
@@ -323,7 +313,6 @@ class DatabaseTestSuite {
             return $affected > 0;
         });
         
-        // Clean up
         db_execute("DELETE FROM users WHERE id = ?", [$test_user_id]);
         db_execute("DELETE FROM menu_items WHERE id = ?", [$test_item_id]);
     }
@@ -358,7 +347,6 @@ class DatabaseTestSuite {
         
         $this->test("Parameter type validation works", function() {
             try {
-                // This should work fine
                 $result = db_fetch_one("SELECT ? as test_value", [123], 'i');
                 return $result && $result['test_value'] == 123;
             } catch (Exception $e) {
@@ -395,7 +383,7 @@ class DatabaseTestSuite {
             $this->db->rollback();
             
             $user = db_fetch_one("SELECT * FROM users WHERE id = ?", [$user_id]);
-            return !$user; // Should not exist after rollback
+            return !$user;
         });
     }
     
@@ -406,8 +394,8 @@ class DatabaseTestSuite {
             $start_time = microtime(true);
             db_fetch_one("SELECT 1");
             $end_time = microtime(true);
-            $execution_time = ($end_time - $start_time) * 1000; // Convert to milliseconds
-            return $execution_time < 100; // Should execute in less than 100ms
+            $execution_time = ($end_time - $start_time) * 1000;
+            return $execution_time < 100;
         });
         
         $this->test("Complex join query executes reasonably", function() {
@@ -421,7 +409,7 @@ class DatabaseTestSuite {
             ");
             $end_time = microtime(true);
             $execution_time = ($end_time - $start_time) * 1000;
-            return $execution_time < 500; // Should execute in less than 500ms
+            return $execution_time < 500;
         });
     }
     
@@ -439,8 +427,7 @@ class DatabaseTestSuite {
         }
         
         echo "</div>\n";
-        
-        // Show failed tests
+
         $failed_tests = array_filter($this->test_results, function($test) {
             return $test['status'] !== 'PASSED';
         });
@@ -462,7 +449,6 @@ class DatabaseTestSuite {
     }
 }
 
-// Run the tests if accessed directly
 if (basename($_SERVER['PHP_SELF']) == 'test_database_operations.php') {
     echo "<!DOCTYPE html><html><head><title>Database Test Results</title></head><body>";
     

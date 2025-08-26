@@ -1,8 +1,5 @@
--- Add more diverse menu items to Savoria restaurant database
-
 USE savoria_db;
 
--- Additional Appetizers
 INSERT INTO menu_items (category_id, name, description, price, is_available, is_featured, display_order) VALUES 
 (1, 'Truffle Arancini', 'Crispy risotto balls stuffed with truffle and parmesan, served with aioli', 16.00, TRUE, FALSE, 1),
 (1, 'Pan-Seared Scallops', 'Fresh Atlantic scallops with cauliflower purée and pancetta crisps', 22.00, TRUE, TRUE, 2),
@@ -11,7 +8,6 @@ INSERT INTO menu_items (category_id, name, description, price, is_available, is_
 (1, 'Wild Mushroom Bruschetta', 'Toasted sourdough with sautéed wild mushrooms and herb ricotta', 14.00, TRUE, FALSE, 5),
 (1, 'Crispy Calamari', 'Fresh squid rings with spicy marinara and lemon aioli', 15.00, TRUE, FALSE, 6);
 
--- Additional Main Courses
 INSERT INTO menu_items (category_id, name, description, price, is_available, is_featured, display_order) VALUES 
 (2, 'Lobster Ravioli', 'House-made pasta filled with Maine lobster in saffron cream sauce', 38.00, TRUE, TRUE, 4),
 (2, 'Duck Confit', 'Slow-cooked duck leg with cherry gastrique and roasted root vegetables', 34.00, TRUE, FALSE, 5),
@@ -24,7 +20,6 @@ INSERT INTO menu_items (category_id, name, description, price, is_available, is_
 (2, 'Beef Tenderloin', 'Filet mignon with truffle mashed potatoes and red wine reduction', 52.00, TRUE, TRUE, 12),
 (2, 'Pork Belly', 'Slow-braised pork belly with apple slaw and bourbon glaze', 30.00, TRUE, FALSE, 13);
 
--- Additional Desserts
 INSERT INTO menu_items (category_id, name, description, price, is_available, is_featured, display_order) VALUES 
 (3, 'Classic Tiramisu', 'Traditional Italian dessert with espresso-soaked ladyfingers and mascarpone', 12.00, TRUE, FALSE, 4),
 (3, 'Crème Brûlée', 'Vanilla bean custard with caramelized sugar and fresh berries', 14.00, TRUE, TRUE, 5),
@@ -35,7 +30,6 @@ INSERT INTO menu_items (category_id, name, description, price, is_available, is_
 (3, 'Apple Tarte Tatin', 'Upside-down apple tart with cinnamon ice cream', 13.00, TRUE, FALSE, 10),
 (3, 'Gelato Selection', 'Three scoops of artisanal gelato - vanilla, chocolate, and pistachio', 9.00, TRUE, FALSE, 11);
 
--- Beverages
 INSERT INTO menu_items (category_id, name, description, price, is_available, is_featured, display_order) VALUES 
 (4, 'House Wine - Red', 'Cabernet Sauvignon from Napa Valley', 12.00, TRUE, FALSE, 1),
 (4, 'House Wine - White', 'Chardonnay from Sonoma County', 11.00, TRUE, FALSE, 2),

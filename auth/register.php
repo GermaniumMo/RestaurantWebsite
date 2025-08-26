@@ -5,7 +5,6 @@ require_once __DIR__ . '/../includes/flash.php';
 require_once __DIR__ . '/../includes/validation.php';
 require_once __DIR__ . '/../includes/security.php';
 
-// Redirect if already logged in
 if (is_logged_in()) {
     header('Location: ' . BASE_URL . '/index.php');
     exit;
@@ -22,8 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = sanitize_input($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
     $confirm_password = $_POST['confirm_password'] ?? '';
-    
-    // Validation rules
+
     $validation_rules = [
         'name' => [
             ['type' => 'required', 'field_name' => 'Name'],
@@ -38,8 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ];
     
     $errors = validate_fields($_POST, $validation_rules);
-    
-    // Password validation
+
     if (empty($password)) {
         $errors['password'] = 'Password is required.';
     } elseif (strlen($password) < 6) {

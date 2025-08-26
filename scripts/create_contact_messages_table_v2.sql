@@ -1,4 +1,3 @@
--- Create contact_messages table if it doesn't exist
 CREATE TABLE IF NOT EXISTS contact_messages (
     id INT AUTO_INCREMENT PRIMARY KEY,
     first_name VARCHAR(100) NOT NULL,

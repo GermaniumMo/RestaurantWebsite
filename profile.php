@@ -4,7 +4,6 @@ require_once __DIR__ . '/includes/db.php';
 require_once __DIR__ . '/includes/flash.php';
 require_once __DIR__ . '/includes/csrf.php';
 
-// Check if user is logged in
 if (!is_logged_in()) {
     header('Location: auth/login.php');
     exit;
@@ -112,39 +111,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-    <header class="d-flex top-header w-100 position-relative">
-        <div class="d-flex justify-content-between py-3 w-100 header-container">
-            <h1><a href="index.php" style="color: white; text-decoration: none;">Savoria</a></h1>
-            <ul class="d-flex list-unstyled gap-4 m-0 justify-content-center align-items-center navbar">
-                <li><a href="index.php" style="color: white; text-decoration: none">Home</a></li>
-                <li><a href="menu.php" style="color: white; text-decoration: none">Menu</a></li>
-                <li><a href="about.php" style="color: white; text-decoration: none">About</a></li>
-                <li><a href="contact.php" style="color: white; text-decoration: none">Contact</a></li>
-            </ul>
-            <div class="d-flex gap-3">
-                <div class="dropdown">
-                    <button class="btn btn-Reserve dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        <?= htmlspecialchars($user['name']) ?>
-                    </button>
-                    <ul class="dropdown-menu">
-                        <?php if (has_role('admin')): ?>
-                            <li><a class="dropdown-item" href="admin/index.php">Admin Dashboard</a></li>
-                        <?php endif; ?>
-                        <li><a class="dropdown-item" href="profile.php">My Profile</a></li>
-                        <li><a class="dropdown-item" href="reservations.php">My Reservations</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <form method="POST" action="auth/logout.php" class="d-inline">
-                                <button type="submit" class="dropdown-item">Logout</button>
-                            </form>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </header>
+   <?php include 'includes/header.php'; ?>
 
-    <div class="container" style="margin-top: 120px;">
+    <div class="container" style="margin-top: 120px; margin-bottom: 120px;">
         <div class="row">
             <div class="col-12">
                 <h2 class="mb-4">My Profile</h2>
@@ -216,7 +185,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
                                     </div>
 
-                                    <button type="submit" class="btn btn-warning">Change Password</button>
+                                    <button type="submit" class="btn btn-warning" style="color: white;">Change Password</button>
                                 </form>
                             </div>
                         </div>
@@ -225,7 +194,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </div>
     </div>
+    <?php include 'includes/footer.php'; ?>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

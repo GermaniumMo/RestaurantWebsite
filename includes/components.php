@@ -1,6 +1,5 @@
 <?php
 
-// Flash message display component
 function render_flash_messages() {
     if (has_flash('success') || has_flash('error') || has_flash('warning') || has_flash('info')): ?>
         <div class="container-fluid" style="margin-top: 100px;">
@@ -13,7 +12,6 @@ function render_flash_messages() {
     <?php endif;
 }
 
-// Feature card component
 function render_feature_card($icon_svg, $title, $description) {
 ?>
     <div class="d-flex flex-column justify-content-center align-items-center">
@@ -24,7 +22,6 @@ function render_feature_card($icon_svg, $title, $description) {
 <?php
 }
 
-// Menu item card component
 function render_menu_card($image_src, $title, $description, $price, $alt_text = '') {
     $alt_text = $alt_text ?: $title . ' Image';
 ?>
@@ -39,7 +36,6 @@ function render_menu_card($image_src, $title, $description, $price, $alt_text = 
 <?php
 }
 
-// Section header component
 function render_section_header($title, $subtitle = '') {
 ?>
     <div class="w-100 d-flex flex-column justify-content-center align-items-center gap-3">
@@ -51,7 +47,6 @@ function render_section_header($title, $subtitle = '') {
 <?php
 }
 
-// Document head component
 function render_document_head($title = 'Savoria', $additional_css = []) {
 ?>
 <!DOCTYPE html>

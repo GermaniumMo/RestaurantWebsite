@@ -1,11 +1,4 @@
 <?php
-/**
- * Security utilities and helpers
- */
-
-/**
- * Set security headers
- */
 function set_security_headers()
 {
     header('X-Content-Type-Options: nosniff');
@@ -20,9 +13,6 @@ function set_security_headers()
     }
 }
 
-/**
- * Rate limiting implementation
- */
 class RateLimiter
 {
     private $db;
@@ -69,9 +59,6 @@ class RateLimiter
     }
 }
 
-/**
- * Get client IP address
- */
 function get_client_ip()
 {
     $ip_keys = ['HTTP_X_FORWARDED_FOR', 'HTTP_X_REAL_IP', 'HTTP_CLIENT_IP', 'REMOTE_ADDR'];
@@ -91,44 +78,30 @@ function get_client_ip()
     return $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 }
 
-/**
- * Validate email format
- */
+
 function is_valid_email($email)
 {
     return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
 }
 
-/**
- * Validate phone number (basic)
- */
 function is_valid_phone($phone)
 {
     $phone = preg_replace('/[^0-9]/', '', $phone);
     return strlen($phone) >= 10 && strlen($phone) <= 15;
 }
 
-/**
- * Validate date format
- */
 function is_valid_date($date, $format = 'Y-m-d')
 {
     $d = DateTime::createFromFormat($format, $date);
     return $d && $d->format($format) === $date;
 }
 
-/**
- * Validate time format
- */
 function is_valid_time($time, $format = 'H:i')
 {
     $t = DateTime::createFromFormat($format, $time);
     return $t && $t->format($format) === $time;
 }
 
-/**
- * Check if password meets requirements
- */
 function is_strong_password($password)
 {
     return strlen($password) >= 8 &&
@@ -137,17 +110,11 @@ function is_strong_password($password)
     preg_match('/[0-9]/', $password);
 }
 
-/**
- * Generate secure random token
- */
 function generate_secure_token($length = 32)
 {
     return bin2hex(random_bytes($length));
 }
 
-/**
- * Log security events
- */
 function log_security_event($event, $details = [], $user_id = null)
 {
     try {
@@ -163,9 +130,6 @@ function log_security_event($event, $details = [], $user_id = null)
     }
 }
 
-/**
- * Sanitize user input
- */
 if (! function_exists('sanitize_input')) {
     function sanitize_input($data)
     {

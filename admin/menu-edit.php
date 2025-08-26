@@ -5,7 +5,6 @@
     require_once __DIR__ . '/../includes/flash.php';
     require_once __DIR__ . '/../includes/validation.php';
 
-    // Require admin role
     require_role('admin');
 
     $page_title   = 'Edit Menu Item';
@@ -18,7 +17,6 @@
         exit;
     }
 
-    // Get menu item
     $menu_item = db_fetch_one("SELECT * FROM menu_items WHERE id = ?", [$menu_item_id], 'i');
     if (! $menu_item) {
         flash('error', 'Menu item not found.');
@@ -31,7 +29,6 @@
     $errors    = [];
     $form_data = $menu_item;
 
-    // Get categories
     $categories = db_fetch_all("SELECT * FROM categories WHERE is_active = 1 ORDER BY display_order ASC");
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -48,7 +45,6 @@
             'display_order' => (int) ($_POST['display_order'] ?? 0),
         ];
 
-        // Validation (same as create)
         if (empty($form_data['name'])) {
             $errors['name'] = 'Menu item name is required.';
         } elseif (strlen($form_data['name']) > 150) {
